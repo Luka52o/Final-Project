@@ -13,6 +13,16 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin 1942.ttf
+/copy:1942.ttf
+
+#begin 1942Font.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:1942Font.spritefont
+
 #begin bridgeRoom.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -97,6 +107,16 @@
 /processorParam:TextureFormat=Color
 /build:hallwayRoom2.png
 
+#begin hammerKeys.TTF
+/copy:hammerKeys.TTF
+
+#begin hammerKeysFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:hammerKeysFont.spritefont
+
 #begin logRoom.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -109,6 +129,18 @@
 /processorParam:TextureFormat=Color
 /build:logRoom.png
 
+#begin rectangle.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:rectangle.png
+
 #begin spaceMapScreen.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -120,6 +152,30 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:spaceMapScreen.png
+
+#begin storyPanel1.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:storyPanel1.png
+
+#begin storyPanel2.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:storyPanel2.png
 
 #begin titleScreen.png
 /importer:TextureImporter

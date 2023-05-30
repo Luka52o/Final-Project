@@ -12,6 +12,7 @@ namespace Final_Project
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
+            _graphics.IsFullScreen = true;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
@@ -20,6 +21,7 @@ namespace Final_Project
         enum Screen
         {
             Title,
+            Story,
             Game,
             EscapePodMap,
         }
@@ -38,16 +40,20 @@ namespace Final_Project
 
         Screen screen;
         Room currentRoom;
+        SpriteFont titleReportFont, generalTextFont;
+        MouseState mouseState;
+        KeyboardState keyboardState;
+
         Texture2D yourEscapePodTexture, cargoBayTexture, hallway1Texture, hallway2Texture, engineRoomTexture, logRoomTexture, commRoomTexture, bridgeTexture, titleScreen;
-        Rectangle backgroundRect;
+        Texture2D rectangleButton, storyPanel1, storyPanel2;
+        Rectangle backgroundRect, startButtonRect, storyTextBox;
+        int storyPanelCount = 0;
 
         protected override void Initialize()
         {
-            _graphics.PreferredBackBufferWidth = 1366;
-            _graphics.PreferredBackBufferHeight = 768;
-
-            backgroundRect = new Rectangle(0, 0, 1366, 768);
-
+            backgroundRect = new Rectangle(0, 0, 1200, 600);
+            startButtonRect = new Rectangle(350, 300, 150, 75);
+            storyTextBox = new Rectangle(0, 0, 800, 800);
             screen = Screen.Title;
 
             base.Initialize();
@@ -68,14 +74,39 @@ namespace Final_Project
             bridgeTexture = Content.Load<Texture2D>("bridgeRoom");
             titleScreen = Content.Load<Texture2D>("titleScreen");
 
+            rectangleButton = Content.Load<Texture2D>("rectangle");
+            storyPanel1 = Content.Load<Texture2D>("storyPanel1");
+            storyPanel2 = Content.Load<Texture2D>("storyPanel2");
 
+            titleReportFont = Content.Load<SpriteFont>("1942Font");
+            generalTextFont = Content.Load<SpriteFont>("hammerKeysFont");
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            mouseState = Mouse.GetState();
 
+            if (screen == Screen.Title)
+            {
+                if (mouseState.LeftButton == ButtonState.Pressed && startButtonRect.Contains(mouseState.X, mouseState.Y))
+                {
+                    screen = Screen.Story;
+                }
+            }
+            else if (screen == Screen.Story)
+            {
+                if (keyboardState.IsKeyDown(Keys.Enter))
+                {
+                    storyPanelCount++;
+                }
+                if (storyPanelCount == 2)
+                {
+                    screen = Screen.Game;
+                    currentRoom = Room.yourEscapePodRoom;
+                }
+            }
 
 
             base.Update(gameTime);
@@ -89,7 +120,30 @@ namespace Final_Project
             if (screen == Screen.Title)
             {
                 _spriteBatch.Draw(titleScreen, backgroundRect, Color.White);
+                _spriteBatch.Draw(rectangleButton, startButtonRect, Color.Black);
+                _spriteBatch.DrawString(titleReportFont, "The Xunari", new Vector2(240, 150), Color.Olive);
+                _spriteBatch.DrawString(generalTextFont, "Start", new Vector2(393, 305), Color.Olive);
             }
+            else if (screen == Screen.Story)
+            {
+                _spriteBatch.Draw(rectangleButton, backgroundRect, Color.Black);
+                if (storyPanelCount == 0)
+                {
+                    _spriteBatch.Draw(storyPanel1, storyTextBox, Color.Black);
+                }
+                else if (storyPanelCount == 1)
+                {
+                    _spriteBatch.Draw(storyPanel2, storyTextBox, Color.Black);
+                }
+            }
+            if (screen == Screen.Game)
+            {
+                if (currentRoom == Room.yourEscapePodRoom)
+                {
+                    _spriteBatch.Draw(yourEscapePodTexture, backgroundRect, Color.White);
+                }
+            }
+
             _spriteBatch.End();
 
             base.Draw(gameTime);
