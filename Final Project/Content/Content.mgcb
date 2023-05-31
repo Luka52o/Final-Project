@@ -47,6 +47,30 @@
 /processorParam:TextureFormat=Color
 /build:cargoBayRoom.png
 
+#begin circle.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:circle.png
+
+#begin closeButton.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:closeButton.png
+
 #begin commRoom.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -141,18 +165,6 @@
 /processorParam:TextureFormat=Color
 /build:rectangle.png
 
-#begin spaceMapScreen.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:spaceMapScreen.png
-
 #begin storyPanel1.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -188,6 +200,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:titleScreen.png
+
+#begin xunariMapIcon.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:xunariMapIcon.png
 
 #begin yourEscapePodRoom.png
 /importer:TextureImporter

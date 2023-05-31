@@ -12,7 +12,6 @@ namespace Final_Project
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
-            _graphics.IsFullScreen = true;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
@@ -28,6 +27,7 @@ namespace Final_Project
         enum Room
         {
             yourEscapePodRoom,
+            travelling,
             cargoBayRoom,
             hallway1Room,
             hallway2Room,
@@ -41,19 +41,28 @@ namespace Final_Project
         Screen screen;
         Room currentRoom;
         SpriteFont titleReportFont, generalTextFont;
-        MouseState mouseState;
+        MouseState newMouseState, oldMouseState;
         KeyboardState keyboardState;
 
         Texture2D yourEscapePodTexture, cargoBayTexture, hallway1Texture, hallway2Texture, engineRoomTexture, logRoomTexture, commRoomTexture, bridgeTexture, titleScreen;
-        Texture2D rectangleButton, storyPanel1, storyPanel2;
-        Rectangle backgroundRect, startButtonRect, storyTextBox;
-        int storyPanelCount = 0;
+        Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture;
+        Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect;
+        int storyPanelCount = 0, iconBlinkCounter;
+        bool travelToXunariPrompt = false;
 
         protected override void Initialize()
         {
-            backgroundRect = new Rectangle(0, 0, 1200, 600);
-            startButtonRect = new Rectangle(350, 300, 150, 75);
-            storyTextBox = new Rectangle(0, 0, 800, 800);
+            _graphics.PreferredBackBufferWidth = 1920;
+            _graphics.PreferredBackBufferHeight = 1080;
+            _graphics.ApplyChanges();
+            backgroundRect = new Rectangle(0, 0, 1920, 1080);
+            startButtonRect = new Rectangle(810, 515, 300, 150);
+            mapButtonRect = new Rectangle(1720, 955, 150, 75);
+            storyTextBox = new Rectangle(380, -75, 1280, 1280);
+            closeButtonRect = new Rectangle(1610, 0, 50, 50);
+            escapePodMapIconRect = new Rectangle(1000, 1000, 20, 20);
+            xunariMapRect = new Rectangle(840, 220, 334, 582);
+            storyPanelCount = 0;
             screen = Screen.Title;
 
             base.Initialize();
@@ -74,9 +83,12 @@ namespace Final_Project
             bridgeTexture = Content.Load<Texture2D>("bridgeRoom");
             titleScreen = Content.Load<Texture2D>("titleScreen");
 
-            rectangleButton = Content.Load<Texture2D>("rectangle");
+            rectangleButtonTexture = Content.Load<Texture2D>("rectangle");
+            circleIconTexture = Content.Load<Texture2D>("circle");
+            closeButtonTexture = Content.Load<Texture2D>("closeButton");
             storyPanel1 = Content.Load<Texture2D>("storyPanel1");
             storyPanel2 = Content.Load<Texture2D>("storyPanel2");
+            xunariMapIconTexture = Content.Load<Texture2D>("xunariMapIcon");
 
             titleReportFont = Content.Load<SpriteFont>("1942Font");
             generalTextFont = Content.Load<SpriteFont>("hammerKeysFont");
@@ -86,18 +98,18 @@ namespace Final_Project
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            mouseState = Mouse.GetState();
+            newMouseState = Mouse.GetState();
 
             if (screen == Screen.Title)
             {
-                if (mouseState.LeftButton == ButtonState.Pressed && startButtonRect.Contains(mouseState.X, mouseState.Y))
+                if (newMouseState.LeftButton == ButtonState.Pressed && startButtonRect.Contains(newMouseState.X, newMouseState.Y))
                 {
                     screen = Screen.Story;
                 }
             }
             else if (screen == Screen.Story)
             {
-                if (keyboardState.IsKeyDown(Keys.Enter))
+                if (newMouseState.LeftButton == ButtonState.Pressed && newMouseState.LeftButton != oldMouseState.LeftButton)
                 {
                     storyPanelCount++;
                 }
@@ -107,42 +119,96 @@ namespace Final_Project
                     currentRoom = Room.yourEscapePodRoom;
                 }
             }
+            else if (screen == Screen.Game)
+            {
+                if (currentRoom == Room.yourEscapePodRoom)
+                {
+                    if (newMouseState.LeftButton == ButtonState.Pressed && mapButtonRect.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        screen = Screen.EscapePodMap;
+                    }
+                }
+            }
+            else if (screen == Screen.EscapePodMap)
+            {
+                if (newMouseState.LeftButton == ButtonState.Pressed && xunariMapRect.Contains(newMouseState.X, newMouseState.Y))
+                {
+                    travelToXunariPrompt = true;
+                }
+                if (travelToXunariPrompt && keyboardState.IsKeyDown(Keys.Enter))
+                {
+                    screen = Screen.Game;
+                    currentRoom = Room.travelling;
+                }
+            }
 
-
+            oldMouseState = newMouseState;
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             _spriteBatch.Begin();
             if (screen == Screen.Title)
             {
                 _spriteBatch.Draw(titleScreen, backgroundRect, Color.White);
-                _spriteBatch.Draw(rectangleButton, startButtonRect, Color.Black);
-                _spriteBatch.DrawString(titleReportFont, "The Xunari", new Vector2(240, 150), Color.Olive);
-                _spriteBatch.DrawString(generalTextFont, "Start", new Vector2(393, 305), Color.Olive);
+                _spriteBatch.Draw(rectangleButtonTexture, startButtonRect, Color.Black);
+                _spriteBatch.DrawString(titleReportFont, "The Xunari", new Vector2(687, 400), Color.Olive);
+                _spriteBatch.DrawString(generalTextFont, "Start", new Vector2(910, 555), Color.Olive);
             }
             else if (screen == Screen.Story)
             {
-                _spriteBatch.Draw(rectangleButton, backgroundRect, Color.Black);
                 if (storyPanelCount == 0)
                 {
-                    _spriteBatch.Draw(storyPanel1, storyTextBox, Color.Black);
+                    _spriteBatch.Draw(storyPanel1, storyTextBox, Color.White);
                 }
                 else if (storyPanelCount == 1)
                 {
-                    _spriteBatch.Draw(storyPanel2, storyTextBox, Color.Black);
+                    _spriteBatch.Draw(storyPanel2, storyTextBox, Color.White);
                 }
             }
-            if (screen == Screen.Game)
+            else if (screen == Screen.EscapePodMap)
+            {
+                _spriteBatch.Draw(yourEscapePodTexture, backgroundRect, Color.White);
+
+                _spriteBatch.Draw(rectangleButtonTexture, storyTextBox, Color.Black);
+                _spriteBatch.Draw(closeButtonTexture, closeButtonRect, Color.White);
+                _spriteBatch.Draw(xunariMapIconTexture, xunariMapRect, Color.White);
+                if (iconBlinkCounter > 60)
+                {
+                    _spriteBatch.Draw(circleIconTexture, escapePodMapIconRect, Color.White);
+                }
+                else if (iconBlinkCounter < 60)
+                {
+                    _spriteBatch.Draw(circleIconTexture, escapePodMapIconRect, Color.DarkRed);
+                }
+                if (iconBlinkCounter == 120)
+                    iconBlinkCounter = 0;
+
+                if (travelToXunariPrompt == true)
+                {
+                    _spriteBatch.DrawString(generalTextFont, "Travel to The Xunari? [ENTER]", new Vector2(840, 850), Color.Olive);
+                }
+                iconBlinkCounter++;
+            }
+            else if (screen == Screen.Game)
             {
                 if (currentRoom == Room.yourEscapePodRoom)
                 {
                     _spriteBatch.Draw(yourEscapePodTexture, backgroundRect, Color.White);
+
+                    _spriteBatch.Draw(rectangleButtonTexture, mapButtonRect, Color.Black);
+                    _spriteBatch.DrawString(generalTextFont, "MAP", new Vector2(1780, 925), Color.Olive);
                 }
+                else if (currentRoom == Room.cargoBayRoom)
+                {
+                    _spriteBatch.Draw(cargoBayTexture, backgroundRect, Color.White);
+                }
+
             }
+            
 
             _spriteBatch.End();
 
