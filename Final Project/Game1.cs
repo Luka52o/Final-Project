@@ -28,12 +28,21 @@ namespace Final_Project
         {
             yourEscapePodRoom,
             travelling,
+            dockingBayRoom,
+            escapePodBayRoom,
+            residenceRoom1,
+            residenceRoom2,
+            securityRoom,
             cargoBayRoom,
             hallway1Room,
             hallway2Room,
+            medBayRoom,
             engineRoom,
+            reactorRoom,
             logRoom,
             commRoom,
+            elevatorRoom,
+            captainsQuartersRoom,
             bridgeRoom,
         }
 
@@ -44,24 +53,25 @@ namespace Final_Project
         MouseState newMouseState, oldMouseState;
         KeyboardState keyboardState;
 
-        Texture2D yourEscapePodTexture, cargoBayTexture, hallway1Texture, hallway2Texture, engineRoomTexture, logRoomTexture, commRoomTexture, bridgeTexture, titleScreen;
+        Texture2D yourEscapePodTexture, dockingBayTexture, cargoBayTexture, hallway1Texture, hallway2Texture, residenceRoom1Texture, residenceRoom2Texture, messHallRoomTexture, securityRoomTexture, engineRoomTexture, reactorRoomTexture, logRoomTexture, commRoomTexture, elevatorRoomTexture, captainsQuartersRoomTexture, bridgeTexture, titleScreen;
         Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture;
-        Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect;
+        Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomIcon;
         int storyPanelCount = 0, iconBlinkCounter;
+        float timeStamp, elapsedTimeSec;
         bool travelToXunariPrompt = false;
 
         protected override void Initialize()
         {
-            _graphics.PreferredBackBufferWidth = 1920;
-            _graphics.PreferredBackBufferHeight = 1080;
+            _graphics.PreferredBackBufferWidth = 1275;
+            _graphics.PreferredBackBufferHeight = 1000;
             _graphics.ApplyChanges();
-            backgroundRect = new Rectangle(0, 0, 1920, 1080);
-            startButtonRect = new Rectangle(810, 515, 300, 150);
-            mapButtonRect = new Rectangle(1720, 955, 150, 75);
-            storyTextBox = new Rectangle(380, -75, 1280, 1280);
+            backgroundRect = new Rectangle(0, 0, 1275, 1000);
+            startButtonRect = new Rectangle(520, 515, 220, 110);
+            mapButtonRect = new Rectangle(1115, 855, 150, 130);
+            storyTextBox = new Rectangle(250, 50, 800, 800);
             closeButtonRect = new Rectangle(1610, 0, 50, 50);
-            escapePodMapIconRect = new Rectangle(1000, 1000, 20, 20);
-            xunariMapRect = new Rectangle(840, 220, 334, 582);
+            escapePodMapIconRect = new Rectangle(700, 810, 20, 20);
+            xunariMapRect = new Rectangle(575, 360, 150, 300);
             storyPanelCount = 0;
             screen = Screen.Title;
 
@@ -73,16 +83,26 @@ namespace Final_Project
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            // ROOM BACKGROUND TEXTURES
             yourEscapePodTexture = Content.Load<Texture2D>("yourEscapePodRoom");
+            dockingBayTexture = Content.Load<Texture2D>("dockingBayRoom");
             cargoBayTexture = Content.Load<Texture2D>("cargoBayRoom");
             hallway1Texture = Content.Load<Texture2D>("hallwayRoom1");
             hallway2Texture = Content.Load<Texture2D>("hallwayRoom2");
+            residenceRoom1Texture = Content.Load<Texture2D>("residenceRoom1");
+            residenceRoom2Texture = Content.Load<Texture2D>("residenceRoom2");
+            messHallRoomTexture = Content.Load<Texture2D>("messHallRoom");
+            securityRoomTexture = Content.Load<Texture2D>("securityRoom");
             engineRoomTexture = Content.Load<Texture2D>("engineRoom");
+            reactorRoomTexture = Content.Load<Texture2D>("reactorRoom");
             logRoomTexture = Content.Load<Texture2D>("logRoom");
             commRoomTexture = Content.Load<Texture2D>("commRoom");
+            elevatorRoomTexture = Content.Load<Texture2D>("elevatorRoom");
+            captainsQuartersRoomTexture = Content.Load<Texture2D>("captainsQuartersRoom");
             bridgeTexture = Content.Load<Texture2D>("bridgeRoom");
             titleScreen = Content.Load<Texture2D>("titleScreen");
 
+            // ICONS, BUTTONS, & CURSORS
             rectangleButtonTexture = Content.Load<Texture2D>("rectangle");
             circleIconTexture = Content.Load<Texture2D>("circle");
             closeButtonTexture = Content.Load<Texture2D>("closeButton");
@@ -90,15 +110,20 @@ namespace Final_Project
             storyPanel2 = Content.Load<Texture2D>("storyPanel2");
             xunariMapIconTexture = Content.Load<Texture2D>("xunariMapIcon");
 
+            // FONTS
             titleReportFont = Content.Load<SpriteFont>("1942Font");
             generalTextFont = Content.Load<SpriteFont>("hammerKeysFont");
         }
 
+
+        // //////////////////////////////////////////////
+        // ////////////////////////////////////////////// UPDATE
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             newMouseState = Mouse.GetState();
+            keyboardState = Keyboard.GetState();
 
             if (screen == Screen.Title)
             {
@@ -128,6 +153,14 @@ namespace Final_Project
                         screen = Screen.EscapePodMap;
                     }
                 }
+                if (currentRoom == Room.travelling)
+                {
+                    elapsedTimeSec = (float)gameTime.TotalGameTime.TotalSeconds - timeStamp;
+                    if (elapsedTimeSec >= 4)
+                    {
+                        currentRoom = Room.dockingBayRoom;
+                    }
+                }
             }
             else if (screen == Screen.EscapePodMap)
             {
@@ -139,6 +172,8 @@ namespace Final_Project
                 {
                     screen = Screen.Game;
                     currentRoom = Room.travelling;
+                    timeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
+                    travelToXunariPrompt = false;
                 }
             }
 
@@ -146,6 +181,9 @@ namespace Final_Project
             base.Update(gameTime);
         }
 
+
+        // ////////////////////////////////////////
+        // //////////////////////////////////////// DRAW
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
@@ -155,8 +193,8 @@ namespace Final_Project
             {
                 _spriteBatch.Draw(titleScreen, backgroundRect, Color.White);
                 _spriteBatch.Draw(rectangleButtonTexture, startButtonRect, Color.Black);
-                _spriteBatch.DrawString(titleReportFont, "The Xunari", new Vector2(687, 400), Color.Olive);
-                _spriteBatch.DrawString(generalTextFont, "Start", new Vector2(910, 555), Color.Olive);
+                _spriteBatch.DrawString(titleReportFont, "The Xunari", new Vector2(387, 400), Color.Olive);
+                _spriteBatch.DrawString(generalTextFont, "Start", new Vector2(580, 525), Color.Olive);
             }
             else if (screen == Screen.Story)
             {
@@ -189,7 +227,7 @@ namespace Final_Project
 
                 if (travelToXunariPrompt == true)
                 {
-                    _spriteBatch.DrawString(generalTextFont, "Travel to The Xunari? [ENTER]", new Vector2(840, 850), Color.Olive);
+                    _spriteBatch.DrawString(generalTextFont, "Travel to The Xunari? [ENTER]", new Vector2(440, 650), Color.Olive);
                 }
                 iconBlinkCounter++;
             }
@@ -200,11 +238,15 @@ namespace Final_Project
                     _spriteBatch.Draw(yourEscapePodTexture, backgroundRect, Color.White);
 
                     _spriteBatch.Draw(rectangleButtonTexture, mapButtonRect, Color.Black);
-                    _spriteBatch.DrawString(generalTextFont, "MAP", new Vector2(1780, 925), Color.Olive);
+                    _spriteBatch.DrawString(generalTextFont, "MAP", new Vector2(1155, 885), Color.Olive);
                 }
-                else if (currentRoom == Room.cargoBayRoom)
+                else if (currentRoom == Room.travelling)
                 {
-                    _spriteBatch.Draw(cargoBayTexture, backgroundRect, Color.White);
+
+                }
+                else if (currentRoom == Room.dockingBayRoom)
+                {
+                    _spriteBatch.Draw(dockingBayTexture, backgroundRect, Color.White);
                 }
 
             }
