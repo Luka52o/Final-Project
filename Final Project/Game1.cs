@@ -34,8 +34,11 @@ namespace Final_Project
             residenceRoom2,
             securityRoom,
             cargoBayRoom,
-            hallway1Room,
-            hallway2Room,
+            hallwayARoom,
+            hallwayBRoom,
+            hallwayCRoom,
+            hallwayDRoom,
+            hallwayERoom,
             medBayRoom,
             engineRoom,
             reactorRoom,
@@ -53,25 +56,38 @@ namespace Final_Project
         MouseState newMouseState, oldMouseState;
         KeyboardState keyboardState;
 
-        Texture2D yourEscapePodTexture, dockingBayTexture, cargoBayTexture, hallway1Texture, hallway2Texture, residenceRoom1Texture, residenceRoom2Texture, messHallRoomTexture, securityRoomTexture, engineRoomTexture, reactorRoomTexture, logRoomTexture, commRoomTexture, elevatorRoomTexture, captainsQuartersRoomTexture, bridgeTexture, titleScreen;
-        Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture;
-        Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomIcon;
+        Texture2D yourEscapePodTexture, dockingBayTexture, escapePodBayTexture, cargoBayTexture, hallway1Texture, hallway2Texture, residenceRoom1Texture, residenceRoom2Texture, messHallRoomTexture, securityRoomTexture, engineRoomTexture, reactorRoomTexture, logRoomTexture, commRoomTexture, elevatorRoomTexture, captainsQuartersRoomTexture, bridgeTexture, titleScreen;
+        Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture;
+        Texture2D DBmove1, DBmove2, DBmove3;
+
+        Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3;
         int storyPanelCount = 0, iconBlinkCounter;
         float timeStamp, elapsedTimeSec;
-        bool travelToXunariPrompt = false;
+        bool travelToXunariPrompt = false, onXunari = false;
 
         protected override void Initialize()
         {
             _graphics.PreferredBackBufferWidth = 1275;
             _graphics.PreferredBackBufferHeight = 1000;
             _graphics.ApplyChanges();
+
             backgroundRect = new Rectangle(0, 0, 1275, 1000);
+
             startButtonRect = new Rectangle(520, 515, 220, 110);
             mapButtonRect = new Rectangle(1115, 855, 150, 130);
-            storyTextBox = new Rectangle(250, 50, 800, 800);
             closeButtonRect = new Rectangle(1610, 0, 50, 50);
+
+            storyTextBox = new Rectangle(250, 50, 800, 800);
+
+            moveRoomRect1 = new Rectangle();
+            moveRoomRect2 = new Rectangle();
+            moveRoomRect2 = new Rectangle();
+
             escapePodMapIconRect = new Rectangle(700, 810, 20, 20);
             xunariMapRect = new Rectangle(575, 360, 150, 300);
+            miniMapRect = new Rectangle(1000, 705, 275, 275);
+            miniMapCurrentRoomRect = new Rectangle();
+
             storyPanelCount = 0;
             screen = Screen.Title;
 
@@ -86,6 +102,7 @@ namespace Final_Project
             // ROOM BACKGROUND TEXTURES
             yourEscapePodTexture = Content.Load<Texture2D>("yourEscapePodRoom");
             dockingBayTexture = Content.Load<Texture2D>("dockingBayRoom");
+            escapePodBayTexture = Content.Load<Texture2D>("escapePodBayRoom");
             cargoBayTexture = Content.Load<Texture2D>("cargoBayRoom");
             hallway1Texture = Content.Load<Texture2D>("hallwayRoom1");
             hallway2Texture = Content.Load<Texture2D>("hallwayRoom2");
@@ -109,10 +126,17 @@ namespace Final_Project
             storyPanel1 = Content.Load<Texture2D>("storyPanel1");
             storyPanel2 = Content.Load<Texture2D>("storyPanel2");
             xunariMapIconTexture = Content.Load<Texture2D>("xunariMapIcon");
+            miniMapTexture = Content.Load<Texture2D>("miniMap");
+            miniMapCurrentRoomTexture = Content.Load<Texture2D>("rectangle");
 
             // FONTS
             titleReportFont = Content.Load<SpriteFont>("1942Font");
             generalTextFont = Content.Load<SpriteFont>("hammerKeysFont");
+
+            // DEBUG
+            DBmove1 = Content.Load<Texture2D>("DBmoveRoom1");
+            DBmove2 = Content.Load<Texture2D>("DBmoveRoom2");
+            DBmove3 = Content.Load<Texture2D>("DBmoveRoom3");
         }
 
 
@@ -153,12 +177,36 @@ namespace Final_Project
                         screen = Screen.EscapePodMap;
                     }
                 }
-                if (currentRoom == Room.travelling)
+                else if (currentRoom == Room.dockingBayRoom)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1024, 942, 234, 31);
+                    moveRoomRect1 = new Rectangle(500, 400, 300, 500);
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        currentRoom = Room.escapePodBayRoom;
+                    }
+                }
+                else if (currentRoom == Room.escapePodBayRoom)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1032, 895, 30, 30);
+                    moveRoomRect1 = new Rectangle(270, 150, 300, 500);
+                    moveRoomRect2 = new Rectangle(950, 200, 300, 500);
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        currentRoom = Room.hallwayARoom;
+                    }
+                    else if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect2.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        currentRoom = Room.hallwayBRoom;
+                    }
+                }
+                else if (currentRoom == Room.travelling)
                 {
                     elapsedTimeSec = (float)gameTime.TotalGameTime.TotalSeconds - timeStamp;
                     if (elapsedTimeSec >= 4)
                     {
                         currentRoom = Room.dockingBayRoom;
+                        onXunari = true;
                     }
                 }
             }
@@ -171,7 +219,8 @@ namespace Final_Project
                 if (travelToXunariPrompt && keyboardState.IsKeyDown(Keys.Enter))
                 {
                     screen = Screen.Game;
-                    currentRoom = Room.travelling;
+                    currentRoom = Room.dockingBayRoom; // change this back to Room.travelling when done debugging
+                    onXunari = true; // and delete this line
                     timeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
                     travelToXunariPrompt = false;
                 }
@@ -189,6 +238,12 @@ namespace Final_Project
             GraphicsDevice.Clear(Color.Black);
 
             _spriteBatch.Begin();
+
+            if (onXunari)
+            {
+                iconBlinkCounter++;
+            }
+
             if (screen == Screen.Title)
             {
                 _spriteBatch.Draw(titleScreen, backgroundRect, Color.White);
@@ -240,18 +295,60 @@ namespace Final_Project
                     _spriteBatch.Draw(rectangleButtonTexture, mapButtonRect, Color.Black);
                     _spriteBatch.DrawString(generalTextFont, "MAP", new Vector2(1155, 885), Color.Olive);
                 }
-                else if (currentRoom == Room.travelling)
-                {
-
-                }
                 else if (currentRoom == Room.dockingBayRoom)
                 {
                     _spriteBatch.Draw(dockingBayTexture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    //debug
+                    _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
+                    _spriteBatch.Draw(DBmove2, moveRoomRect2, Color.White);
+                    _spriteBatch.Draw(DBmove3, moveRoomRect3, Color.White);
+
+                    if (iconBlinkCounter < 60)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+                    }
+                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+                    }
+                    else if (iconBlinkCounter == 120)
+                        iconBlinkCounter = 0;
                 }
+                else if (currentRoom == Room.hallwayARoom)
+                {
+                    _spriteBatch.Draw(hallway1Texture, backgroundRect, Color.White);
 
+
+                }
+                else if (currentRoom == Room.hallwayBRoom)
+                {
+                    _spriteBatch.Draw(hallway2Texture, backgroundRect, Color.White);
+
+
+                }
+                else if (currentRoom == Room.escapePodBayRoom)
+                {
+                    _spriteBatch.Draw(escapePodBayTexture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    //debug
+                    _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
+                    _spriteBatch.Draw(DBmove2, moveRoomRect2, Color.White);
+                    _spriteBatch.Draw(DBmove3, moveRoomRect3, Color.White);
+
+
+                    if (iconBlinkCounter < 60)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+                    }
+                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+                    }
+                    else if (iconBlinkCounter == 120)
+                        iconBlinkCounter = 0;
+                }
             }
-            
-
             _spriteBatch.End();
 
             base.Draw(gameTime);
