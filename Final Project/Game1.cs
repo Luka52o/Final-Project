@@ -32,6 +32,7 @@ namespace Final_Project
             escapePodBayRoom,
             residenceRoom1,
             residenceRoom2,
+            messHallRoom,
             securityRoom,
             cargoBayRoom,
             hallwayARoom,
@@ -151,11 +152,12 @@ namespace Final_Project
 
             if (screen == Screen.Title)
             {
-                if (newMouseState.LeftButton == ButtonState.Pressed && startButtonRect.Contains(newMouseState.X, newMouseState.Y))
+                if (newMouseState.LeftButton == ButtonState.Pressed && startButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                 {
                     screen = Screen.Story;
                 }
             }
+
             else if (screen == Screen.Story)
             {
                 if (newMouseState.LeftButton == ButtonState.Pressed && newMouseState.LeftButton != oldMouseState.LeftButton)
@@ -168,38 +170,164 @@ namespace Final_Project
                     currentRoom = Room.yourEscapePodRoom;
                 }
             }
+
+
             else if (screen == Screen.Game)
             {
                 if (currentRoom == Room.yourEscapePodRoom)
                 {
-                    if (newMouseState.LeftButton == ButtonState.Pressed && mapButtonRect.Contains(newMouseState.X, newMouseState.Y))
+                    if (newMouseState.LeftButton == ButtonState.Pressed && mapButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                     {
                         screen = Screen.EscapePodMap;
                     }
                 }
+
                 else if (currentRoom == Room.dockingBayRoom)
                 {
                     miniMapCurrentRoomRect = new Rectangle(1024, 942, 234, 31);
                     moveRoomRect1 = new Rectangle(500, 400, 300, 500);
-                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                     {
                         currentRoom = Room.escapePodBayRoom;
                     }
                 }
+
                 else if (currentRoom == Room.escapePodBayRoom)
                 {
                     miniMapCurrentRoomRect = new Rectangle(1032, 895, 30, 30);
                     moveRoomRect1 = new Rectangle(270, 150, 300, 500);
                     moveRoomRect2 = new Rectangle(950, 200, 300, 500);
-                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                     {
                         currentRoom = Room.hallwayARoom;
                     }
-                    else if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect2.Contains(newMouseState.X, newMouseState.Y))
+                    else if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect2.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                     {
                         currentRoom = Room.hallwayBRoom;
                     }
                 }
+
+                else if (currentRoom == Room.hallwayARoom)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1040, 840, 14, 49);
+                    moveRoomRect1 = new Rectangle(585, 150, 300, 500);
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                    {
+                        currentRoom = Room.residenceRoom1;
+                    }
+                }
+
+                else if (currentRoom == Room.hallwayBRoom)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1069, 903, 49, 14);
+                    moveRoomRect1 = new Rectangle(720, 150, 300, 500);
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                    {
+                        currentRoom = Room.cargoBayRoom;
+                    }
+                }
+
+                else if (currentRoom == Room.residenceRoom1)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1032, 807, 30, 30);
+                    moveRoomRect1 = new Rectangle(920, 150, 300, 500);
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                    {
+                        currentRoom = Room.messHallRoom;
+                    }
+                }
+
+                else if (currentRoom == Room.cargoBayRoom)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1126, 895, 30, 30);
+                    moveRoomRect1 = new Rectangle(920, 150, 300, 500);
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                    {
+                        currentRoom = Room.engineRoom;
+                    }
+                }
+
+                else if (currentRoom == Room.messHallRoom)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1069, 807, 50, 84);
+                    moveRoomRect1 = new Rectangle(920, 150, 300, 500);
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                    {
+                        currentRoom = Room.securityRoom;
+                    }
+                }
+
+                else if (currentRoom == Room.securityRoom)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1126, 807, 30, 30);
+                    moveRoomRect1 = new Rectangle(920, 150, 300, 500);
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                    {
+                        currentRoom = Room.hallwayDRoom;
+                    }
+                }
+
+                else if (currentRoom == Room.engineRoom)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1170, 895, 30, 30);
+                    moveRoomRect1 = new Rectangle(820, 150, 300, 500);
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                    {
+                        currentRoom = Room.reactorRoom;
+                    }
+                }
+
+                else if (currentRoom == Room.reactorRoom)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1215, 895, 30, 30);
+                    moveRoomRect1 = new Rectangle(870, 150, 300, 500);
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                    {
+                        currentRoom = Room.commRoom;
+                    }
+                }
+
+                else if (currentRoom == Room.commRoom)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1215, 850, 30, 30);
+                    moveRoomRect1 = new Rectangle(870, 150, 300, 500);
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                    {
+                        currentRoom = Room.medBayRoom;
+                    }
+                }
+
+                else if (currentRoom == Room.hallwayDRoom)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1162, 815, 49, 14);
+                    moveRoomRect1 = new Rectangle(720, 150, 300, 500);
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                    {
+                        currentRoom = Room.medBayRoom;
+                    }
+                }
+
+                else if (currentRoom == Room.medBayRoom)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1215, 855, 30, 30);
+                    moveRoomRect1 = new Rectangle(870, 150, 300, 500);
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                    {
+                        currentRoom = Room.medBayRoom;
+                    }
+                }
+
                 else if (currentRoom == Room.travelling)
                 {
                     elapsedTimeSec = (float)gameTime.TotalGameTime.TotalSeconds - timeStamp;
@@ -212,7 +340,7 @@ namespace Final_Project
             }
             else if (screen == Screen.EscapePodMap)
             {
-                if (newMouseState.LeftButton == ButtonState.Pressed && xunariMapRect.Contains(newMouseState.X, newMouseState.Y))
+                if (newMouseState.LeftButton == ButtonState.Pressed && xunariMapRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                 {
                     travelToXunariPrompt = true;
                 }
@@ -251,6 +379,7 @@ namespace Final_Project
                 _spriteBatch.DrawString(titleReportFont, "The Xunari", new Vector2(387, 400), Color.Olive);
                 _spriteBatch.DrawString(generalTextFont, "Start", new Vector2(580, 525), Color.Olive);
             }
+
             else if (screen == Screen.Story)
             {
                 if (storyPanelCount == 0)
@@ -262,6 +391,7 @@ namespace Final_Project
                     _spriteBatch.Draw(storyPanel2, storyTextBox, Color.White);
                 }
             }
+
             else if (screen == Screen.EscapePodMap)
             {
                 _spriteBatch.Draw(yourEscapePodTexture, backgroundRect, Color.White);
@@ -286,6 +416,9 @@ namespace Final_Project
                 }
                 iconBlinkCounter++;
             }
+
+
+
             else if (screen == Screen.Game)
             {
                 if (currentRoom == Room.yourEscapePodRoom)
@@ -295,6 +428,7 @@ namespace Final_Project
                     _spriteBatch.Draw(rectangleButtonTexture, mapButtonRect, Color.Black);
                     _spriteBatch.DrawString(generalTextFont, "MAP", new Vector2(1155, 885), Color.Olive);
                 }
+
                 else if (currentRoom == Room.dockingBayRoom)
                 {
                     _spriteBatch.Draw(dockingBayTexture, backgroundRect, Color.White);
@@ -315,18 +449,7 @@ namespace Final_Project
                     else if (iconBlinkCounter == 120)
                         iconBlinkCounter = 0;
                 }
-                else if (currentRoom == Room.hallwayARoom)
-                {
-                    _spriteBatch.Draw(hallway1Texture, backgroundRect, Color.White);
 
-
-                }
-                else if (currentRoom == Room.hallwayBRoom)
-                {
-                    _spriteBatch.Draw(hallway2Texture, backgroundRect, Color.White);
-
-
-                }
                 else if (currentRoom == Room.escapePodBayRoom)
                 {
                     _spriteBatch.Draw(escapePodBayTexture, backgroundRect, Color.White);
@@ -336,6 +459,197 @@ namespace Final_Project
                     _spriteBatch.Draw(DBmove2, moveRoomRect2, Color.White);
                     _spriteBatch.Draw(DBmove3, moveRoomRect3, Color.White);
 
+
+                    if (iconBlinkCounter < 60)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+                    }
+                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+                    }
+                    else if (iconBlinkCounter == 120)
+                        iconBlinkCounter = 0;
+                }
+
+                else if (currentRoom == Room.hallwayARoom)
+                {
+                    _spriteBatch.Draw(hallway1Texture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    // debug
+                    _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
+                    _spriteBatch.Draw(DBmove3, moveRoomRect3, Color.White);
+
+                    if (iconBlinkCounter < 60)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+                    }
+                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+                    }
+                    else if (iconBlinkCounter == 120)
+                        iconBlinkCounter = 0;
+                }
+
+                else if (currentRoom == Room.hallwayBRoom)
+                {
+                    _spriteBatch.Draw(hallway1Texture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+
+                    _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
+
+                    if (iconBlinkCounter < 60)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+                    }
+                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+                    }
+                    else if (iconBlinkCounter == 120)
+                        iconBlinkCounter = 0;
+                }
+
+                else if (currentRoom == Room.residenceRoom1)
+                {
+                    _spriteBatch.Draw(residenceRoom1Texture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+
+                    _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
+
+                    if (iconBlinkCounter < 60)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+                    }
+                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+                    }
+                    else if (iconBlinkCounter == 120)
+                        iconBlinkCounter = 0;
+                }
+
+                else if (currentRoom == Room.cargoBayRoom)
+                {
+                    _spriteBatch.Draw(cargoBayTexture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+
+                    _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
+
+                    if (iconBlinkCounter < 60)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+                    }
+                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+                    }
+                    else if (iconBlinkCounter == 120)
+                        iconBlinkCounter = 0;
+                }
+
+                else if (currentRoom == Room.messHallRoom)
+                {
+                    _spriteBatch.Draw(messHallRoomTexture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+
+                    _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
+
+                    if (iconBlinkCounter < 60)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+                    }
+                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+                    }
+                    else if (iconBlinkCounter == 120)
+                        iconBlinkCounter = 0;
+                }
+                
+                else if (currentRoom == Room.engineRoom)
+                {
+                    _spriteBatch.Draw(engineRoomTexture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+
+                    _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
+
+                    if (iconBlinkCounter < 60)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+                    }
+                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+                    }
+                    else if (iconBlinkCounter == 120)
+                        iconBlinkCounter = 0;
+                }
+
+                else if (currentRoom == Room.securityRoom)
+                {
+                    _spriteBatch.Draw(securityRoomTexture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+
+                    _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
+
+                    if (iconBlinkCounter < 60)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+                    }
+                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+                    }
+                    else if (iconBlinkCounter == 120)
+                        iconBlinkCounter = 0;
+                }
+
+                else if (currentRoom == Room.reactorRoom)
+                {
+                    _spriteBatch.Draw(reactorRoomTexture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+
+                    _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
+
+                    if (iconBlinkCounter < 60)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+                    }
+                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+                    }
+                    else if (iconBlinkCounter == 120)
+                        iconBlinkCounter = 0;
+                }
+
+                else if (currentRoom == Room.hallwayDRoom)
+                {
+                    _spriteBatch.Draw(hallway1Texture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+
+                    _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
+
+                    if (iconBlinkCounter < 60)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+                    }
+                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+                    }
+                    else if (iconBlinkCounter == 120)
+                        iconBlinkCounter = 0;
+                }
+
+                else if (currentRoom == Room.commRoom)
+                {
+                    _spriteBatch.Draw(commRoomTexture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+
+                    _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
 
                     if (iconBlinkCounter < 60)
                     {
