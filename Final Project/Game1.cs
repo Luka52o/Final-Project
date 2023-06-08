@@ -58,7 +58,7 @@ namespace Final_Project
         KeyboardState keyboardState;
 
         Texture2D yourEscapePodTexture, dockingBayTexture, escapePodBayTexture, cargoBayTexture, hallway1Texture, hallway2Texture, residenceRoom1Texture, residenceRoom2Texture, messHallRoomTexture, securityRoomTexture, medBayRoomTexture, engineRoomTexture, reactorRoomTexture, logRoomTexture, commRoomTexture, elevatorRoomTexture, captainsQuartersRoomTexture, bridgeTexture, titleScreen;
-        Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture;
+        Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture, moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown, circleCursor;
         Texture2D DBmove1, DBmove2, DBmove3;
 
         Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4;
@@ -131,6 +131,11 @@ namespace Final_Project
             xunariMapIconTexture = Content.Load<Texture2D>("xunariMapIcon");
             miniMapTexture = Content.Load<Texture2D>("miniMap");
             miniMapCurrentRoomTexture = Content.Load<Texture2D>("rectangle");
+            moveCursorLeft = Content.Load<Texture2D>("moveCursorL");
+            moveCursorRight = Content.Load<Texture2D>("moveCursorR");
+            moveCursorUp = Content.Load<Texture2D>("moveCursorU");
+            moveCursorDown = Content.Load<Texture2D>("moveCursorD");
+            circleCursor = Content.Load<Texture2D>("circleCursor");
 
             // FONTS
             titleReportFont = Content.Load<SpriteFont>("1942Font");
@@ -186,16 +191,7 @@ namespace Final_Project
 
                 else if (currentRoom == Room.dockingBayRoom)
                 {
-                    miniMapCurrentRoomRect = new Rectangle(1024, 942, 234, 31);
-                    moveRoomRect1 = new Rectangle(500, 400, 300, 500);
-                    moveRoomRect2 = new Rectangle(); // when room jumping is done, these blank rectangles can all be removed since they wont do anything when clicked anyways
-                    moveRoomRect3 = new Rectangle();
-
-                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
-                    {
-                        prevRoom = currentRoom;
-                        currentRoom = Room.escapePodBayRoom;
-                    }
+                    UpdateDockigBay();
                 }
 
                 else if (currentRoom == Room.escapePodBayRoom)
@@ -327,6 +323,20 @@ namespace Final_Project
                     }
                 }
 
+                else if (currentRoom == Room.residenceRoom2)
+                {
+                    miniMapCurrentRoomRect = new Rectangle(1079, 767, 30, 30);
+                    moveRoomRect1 = new Rectangle(375, 775, 500, 215); // bottom wide
+                    moveRoomRect2 = new Rectangle();
+                    moveRoomRect3 = new Rectangle();
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                    {
+                        prevRoom = currentRoom;
+                        currentRoom = Room.messHallRoom;
+                    }
+                }
+
                 else if (currentRoom == Room.securityRoom)
                 {
                     miniMapCurrentRoomRect = new Rectangle(1126, 807, 30, 30);
@@ -435,7 +445,7 @@ namespace Final_Project
 
                 else if (currentRoom == Room.logRoom)
                 {
-                    miniMapCurrentRoomRect = new Rectangle(1126, 845, 30, 30);
+                    miniMapCurrentRoomRect = new Rectangle(1126, 850, 30, 30);
                     moveRoomRect1 = new Rectangle(920, 150, 300, 500); // left side long
                     moveRoomRect2 = new Rectangle(375, 100, 500, 215); // top wide
                     moveRoomRect3 = new Rectangle();
@@ -535,6 +545,11 @@ namespace Final_Project
 
             _spriteBatch.Begin();
 
+            if (!moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && !moveRoomRect2.Contains(newMouseState.X, newMouseState.Y) && !moveRoomRect3.Contains(newMouseState.X, newMouseState.Y) && !moveRoomRect4.Contains(newMouseState.X, newMouseState.Y))
+            {
+                _spriteBatch.Draw(circleCursor, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
+            }
+
             if (onXunari)
             {
                 iconBlinkCounter++;
@@ -599,23 +614,7 @@ namespace Final_Project
 
                 else if (currentRoom == Room.dockingBayRoom)
                 {
-                    _spriteBatch.Draw(dockingBayTexture, backgroundRect, Color.White);
-                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
-                    //debug
-                    _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
-                    _spriteBatch.Draw(DBmove2, moveRoomRect2, Color.White);
-                    _spriteBatch.Draw(DBmove3, moveRoomRect3, Color.White);
-
-                    if (iconBlinkCounter < 60)
-                    {
-                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
-                    }
-                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
-                    {
-                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
-                    }
-                    else if (iconBlinkCounter == 120)
-                        iconBlinkCounter = 0;
+                    DrawDockingBay();
                 }
 
                 else if (currentRoom == Room.escapePodBayRoom)
@@ -719,7 +718,24 @@ namespace Final_Project
                     else if (iconBlinkCounter == 120)
                         iconBlinkCounter = 0;
                 }
-                
+
+                else if (currentRoom == Room.residenceRoom2)
+                {
+                    _spriteBatch.Draw(residenceRoom2Texture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+
+                    if (iconBlinkCounter < 60)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+                    }
+                    else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+                    {
+                        _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+                    }
+                    else if (iconBlinkCounter == 120)
+                        iconBlinkCounter = 0;
+                }
+
                 else if (currentRoom == Room.engineRoom)
                 {
                     _spriteBatch.Draw(engineRoomTexture, backgroundRect, Color.White);
@@ -866,5 +882,41 @@ namespace Final_Project
 
             base.Draw(gameTime);
         }
+
+        public void UpdateDockigBay()
+        {
+            miniMapCurrentRoomRect = new Rectangle(1024, 942, 234, 31);
+            moveRoomRect1 = new Rectangle(500, 400, 300, 500);
+            moveRoomRect2 = new Rectangle(); // when room jumping is done, these blank rectangles can all be removed since they wont do anything when clicked anyways
+            moveRoomRect3 = new Rectangle();
+
+            if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+            {
+                prevRoom = currentRoom;
+                currentRoom = Room.escapePodBayRoom;
+            }
+        }
+
+        public void DrawDockingBay()
+        {
+            _spriteBatch.Draw(dockingBayTexture, backgroundRect, Color.White);
+            _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+            //debug
+            _spriteBatch.Draw(DBmove1, moveRoomRect1, Color.White);
+            _spriteBatch.Draw(DBmove2, moveRoomRect2, Color.White);
+            _spriteBatch.Draw(DBmove3, moveRoomRect3, Color.White);
+
+            if (iconBlinkCounter < 60)
+            {
+                _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+            }
+            else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+            {
+                _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+            }
+            else if (iconBlinkCounter == 120)
+                iconBlinkCounter = 0;
+        }
+
     }
 }
