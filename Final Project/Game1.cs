@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Linq.Expressions;
 
 namespace Final_Project
 {
@@ -50,18 +51,31 @@ namespace Final_Project
             bridgeRoom,
         }
 
+        enum Story
+        {
+            start,
+            goToLogRoom,
+            searchAltEscapePod,
+            findKeyCard1,
+            findKeyCard2,
+            findKeyCard3,
+            findKeyCard4,
+            openBridge,
+            end
+        }
 
+        Story activeTask;
         Screen screen;
-        Room currentRoom, prevRoom; // prevRoom will be used to decide which end of a hallway the rooms should be based on where the player is coming from
+        Room currentRoom, prevRoom;
         SpriteFont titleReportFont, generalTextFont;
         MouseState newMouseState, oldMouseState;
         KeyboardState keyboardState;
 
         Texture2D yourEscapePodTexture, dockingBayTexture, escapePodBayTexture, cargoBayTexture, hallway1Texture, hallway2Texture, residenceRoom1Texture, residenceRoom2Texture, messHallRoomTexture, securityRoomTexture, medBayRoomTexture, engineRoomTexture, reactorRoomTexture, logRoomTexture, commRoomTexture, elevatorRoomTexture, captainsQuartersRoomTexture, bridgeTexture, titleScreen;
-        Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture, moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown, circleCursor;
+        Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture, moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown, circleCursor, BoxFrameTexture;
         Texture2D DBmove1, DBmove2, DBmove3;
 
-        Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4;
+        Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4, locationBoxRect, textBoxRect, storyButtonRect;
         int storyPanelCount = 0, iconBlinkCounter;
         float timeStamp, elapsedTimeSec;
         bool travelToXunariPrompt = false, onXunari = false;
@@ -79,6 +93,9 @@ namespace Final_Project
             closeButtonRect = new Rectangle(1610, 0, 50, 50);
 
             storyTextBox = new Rectangle(250, 50, 800, 800);
+            locationBoxRect = new Rectangle(10, 890, 250, 100);
+            textBoxRect = new Rectangle(10, 10, 880, 60);
+            storyButtonRect = new Rectangle(600, 700, 300, 100);
 
             moveRoomRect1 = new Rectangle();
             moveRoomRect2 = new Rectangle();
@@ -92,6 +109,7 @@ namespace Final_Project
 
             storyPanelCount = 0;
             screen = Screen.Title;
+            activeTask = Story.start;
 
             base.Initialize();
 
@@ -136,10 +154,11 @@ namespace Final_Project
             moveCursorUp = Content.Load<Texture2D>("moveCursorU");
             moveCursorDown = Content.Load<Texture2D>("moveCursorD");
             circleCursor = Content.Load<Texture2D>("circleCursor");
+            BoxFrameTexture = Content.Load<Texture2D>("TextBorder");
 
             // FONTS
             titleReportFont = Content.Load<SpriteFont>("1942Font");
-            generalTextFont = Content.Load<SpriteFont>("hammerKeysFont");
+            generalTextFont = Content.Load<SpriteFont>("momTypewriter");
 
             // DEBUG
             DBmove1 = Content.Load<Texture2D>("DBmoveRoom1");
@@ -177,7 +196,6 @@ namespace Final_Project
                     currentRoom = Room.yourEscapePodRoom;
                 }
             }
-
 
             else if (screen == Screen.Game)
             {
@@ -229,7 +247,16 @@ namespace Final_Project
                     UpdateHallwayC();
 
                 else if (currentRoom == Room.logRoom)
+                {
                     UpdateLogRoom();
+                    if (activeTask == Story.goToLogRoom)
+                    {
+                        if (newMouseState.LeftButton == ButtonState.Pressed && storyButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                        {
+
+                        }
+                    }
+                }
 
                 else if (currentRoom == Room.hallwayDRoom)
                     UpdateHallwayD();
@@ -240,10 +267,14 @@ namespace Final_Project
                 else if (currentRoom == Room.travelling)
                 {
                     elapsedTimeSec = (float)gameTime.TotalGameTime.TotalSeconds - timeStamp;
-                    if (elapsedTimeSec >= 4)
+
+                    if (activeTask == Story.start)
                     {
-                        currentRoom = Room.dockingBayRoom;
-                        onXunari = true;
+                        if (elapsedTimeSec >= 4)
+                        {
+                            currentRoom = Room.dockingBayRoom;
+                            onXunari = true;
+                        }
                     }
                 }
             }
@@ -258,6 +289,7 @@ namespace Final_Project
                     screen = Screen.Game;
                     currentRoom = Room.dockingBayRoom; // change this back to Room.travelling when done debugging
                     onXunari = true; // and delete this line
+                    activeTask = Story.goToLogRoom;
                     timeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
                     travelToXunariPrompt = false;
                 }
@@ -343,9 +375,17 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(dockingBayTexture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Docking Bay", new Vector2(33, 920), Color.Black);
+
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
                         _spriteBatch.Draw(moveCursorUp, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
+                    }
+                    if (activeTask == Story.goToLogRoom)
+                    {
+                        _spriteBatch.Draw(BoxFrameTexture, textBoxRect, Color.White);
+                        _spriteBatch.Draw(rectangleButtonTexture, textBoxRect, Color.Black);
+                        _spriteBatch.DrawString(generalTextFont, "The log room would be the best place for me to start.", new Vector2(20, 20), Color.Olive);
                     }
 
                     RunMapBlinker();
@@ -355,6 +395,8 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(escapePodBayTexture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Pod Bay", new Vector2(57, 920), Color.Black);
+
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
                         _spriteBatch.Draw(moveCursorUp, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
@@ -375,6 +417,8 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(hallway1Texture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Hall A", new Vector2(57, 920), Color.Black);
+
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
@@ -392,6 +436,7 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(hallway1Texture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Hall B", new Vector2(57, 920), Color.Black);
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
@@ -409,6 +454,8 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(residenceRoom1Texture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Residence A", new Vector2(35, 920), Color.Black);
+
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
@@ -425,6 +472,8 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(cargoBayTexture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Cargo Bay", new Vector2(51, 920), Color.Black);
+
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
@@ -442,6 +491,8 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(messHallRoomTexture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Mess Hall", new Vector2(49, 920), Color.Black);
+
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
@@ -463,6 +514,7 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(residenceRoom2Texture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Residence B", new Vector2(35, 920), Color.Black);
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
@@ -476,6 +528,8 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(engineRoomTexture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Engine Room", new Vector2(40, 920), Color.Black);
+
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
@@ -493,6 +547,7 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(securityRoomTexture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Security Office", new Vector2(35, 920), Color.Black);
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
@@ -514,6 +569,7 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(reactorRoomTexture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Reactor", new Vector2(49, 920), Color.Black);
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
@@ -531,6 +587,7 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(hallway1Texture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Hall B", new Vector2(57, 920), Color.Black);
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
@@ -548,6 +605,7 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(commRoomTexture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Comm Room", new Vector2(57, 920), Color.Black);
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
@@ -569,6 +627,7 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(hallway1Texture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Hall C", new Vector2(57, 920), Color.Black);
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
@@ -586,6 +645,23 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(logRoomTexture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Log Room", new Vector2(57, 920), Color.Black);
+
+                    if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        _spriteBatch.Draw(moveCursorRight, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
+                    }
+                    else if (moveRoomRect2.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        _spriteBatch.Draw(moveCursorUp, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
+                    }
+
+                    if (activeTask == Story.goToLogRoom)
+                    {
+                        _spriteBatch.Draw(rectangleButtonTexture, storyButtonRect, Color.Black);
+                        _spriteBatch.Draw(BoxFrameTexture, storyButtonRect, Color.White);
+                        _spriteBatch.DrawString(generalTextFont, "Examine Ship Logs", new Vector2(610, 730), Color.Olive);
+                    }
 
                     RunMapBlinker();
                 }
@@ -594,7 +670,21 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(medBayRoomTexture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
-                    
+                    _spriteBatch.DrawString(generalTextFont, "Med Bay", new Vector2(57, 920), Color.Black);
+
+                    if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        _spriteBatch.Draw(moveCursorLeft, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
+                    }
+                    else if (moveRoomRect2.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        _spriteBatch.Draw(moveCursorDown, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
+                    }
+                    else if (moveRoomRect3.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        _spriteBatch.Draw(moveCursorRight, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
+                    }
+
                     RunMapBlinker();
                 }
             }
@@ -608,10 +698,18 @@ namespace Final_Project
                 _spriteBatch.Draw(circleCursor, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
             }
 
+            if (onXunari)
+            {
+                _spriteBatch.Draw(BoxFrameTexture, locationBoxRect, Color.White);
+            }
+
             _spriteBatch.End();
 
             base.Draw(gameTime);
         }
+
+        // ///////////////////////////////////////
+
         public void RunMapBlinker()
         {
             if (iconBlinkCounter < 60)

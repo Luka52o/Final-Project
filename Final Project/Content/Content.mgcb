@@ -285,6 +285,16 @@
 /processorParam:TextureFormat=Color
 /build:miniMap.png
 
+#begin Mom.ttf
+/copy:Mom.ttf
+
+#begin momTypewriter.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:momTypewriter.spritefont
+
 #begin moveCursorD.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -416,6 +426,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:storyPanel2.png
+
+#begin TextBorder.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:TextBorder.png
 
 #begin titleScreen.png
 /importer:TextureImporter
