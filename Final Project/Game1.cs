@@ -72,13 +72,13 @@ namespace Final_Project
         KeyboardState keyboardState;
 
         Texture2D yourEscapePodTexture, dockingBayTexture, escapePodBayTexture, cargoBayTexture, hallway1Texture, hallway2Texture, residenceRoom1Texture, residenceRoom2Texture, messHallRoomTexture, securityRoomTexture, medBayRoomTexture, engineRoomTexture, reactorRoomTexture, logRoomTexture, commRoomTexture, elevatorRoomTexture, captainsQuartersRoomTexture, bridgeTexture, titleScreen;
-        Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture, moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown, circleCursor, BoxFrameTexture;
+        Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture, moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown, circleCursor, BoxFrameTexture, logPanel1Texture, logPanel2Texture;
         Texture2D DBmove1, DBmove2, DBmove3;
 
         Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4, locationBoxRect, textBoxRect, storyButtonRect;
-        int storyPanelCount = 0, iconBlinkCounter;
+        int storyPanelCount = 0, logPanelCount = 0, iconBlinkCounter;
         float timeStamp, elapsedTimeSec;
-        bool travelToXunariPrompt = false, onXunari = false;
+        bool travelToXunariPrompt = false, onXunari = false, readingShipLogs = false;
 
         protected override void Initialize()
         {
@@ -155,6 +155,8 @@ namespace Final_Project
             moveCursorDown = Content.Load<Texture2D>("moveCursorD");
             circleCursor = Content.Load<Texture2D>("circleCursor");
             BoxFrameTexture = Content.Load<Texture2D>("TextBorder");
+            logPanel1Texture = Content.Load<Texture2D>("logPanel1");
+            logPanel2Texture = Content.Load<Texture2D>("logPanel2");
 
             // FONTS
             titleReportFont = Content.Load<SpriteFont>("1942Font");
@@ -253,9 +255,14 @@ namespace Final_Project
                     {
                         if (newMouseState.LeftButton == ButtonState.Pressed && storyButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                         {
-                            // implement log story panels here
                             activeTask = Story.searchAltEscapePod;
+                            readingShipLogs = true;
                         }
+                    }
+                    else if (activeTask == Story.searchAltEscapePod)
+                    {
+                        if (newMouseState.LeftButton == ButtonState.Pressed && newMouseState != oldMouseState)
+                            logPanelCount++;
                     }
                 }
 
@@ -652,7 +659,7 @@ namespace Final_Project
                 else if (currentRoom == Room.logRoom)
                 {
                     _spriteBatch.Draw(logRoomTexture, backgroundRect, Color.White);
-                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    //_spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
                     _spriteBatch.DrawString(generalTextFont, "Log Room", new Vector2(57, 920), Color.Olive);
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
@@ -669,16 +676,28 @@ namespace Final_Project
                         _spriteBatch.Draw(rectangleButtonTexture, storyButtonRect, Color.Black);
                         _spriteBatch.Draw(BoxFrameTexture, storyButtonRect, Color.White);
                         _spriteBatch.DrawString(generalTextFont, "Examine Ship Logs", new Vector2(610, 730), Color.Olive);
-                        
-                        if (activeTask == Story.searchAltEscapePod)
+
+                    }
+                    if (activeTask == Story.searchAltEscapePod)
+                    {
+                        if (logPanelCount == 0)
                         {
+                            _spriteBatch.Draw(logPanel1Texture, backgroundRect, Color.White);
+                        }
+                        else if (logPanelCount == 1)
+                        {
+                            _spriteBatch.Draw(logPanel2Texture, backgroundRect, Color.White);
+                        }
+                        else if (logPanelCount >= 2)
+                        {
+                            readingShipLogs = false;
                             _spriteBatch.Draw(BoxFrameTexture, textBoxRect, Color.White);
                             _spriteBatch.Draw(rectangleButtonTexture, textBoxRect, Color.Black);
-                            _spriteBatch.DrawString(generalTextFont, "I need to go to the pod bay and get to pod #17.", new Vector2(20, 20), Color.Olive);
+                            _spriteBatch.DrawString(generalTextFont, "I need to go to the pod bay and get to pod 17.", new Vector2(20, 20), Color.Olive);
                         }
                     }
-
-                    RunMapBlinker();
+                    if (!readingShipLogs)
+                        RunMapBlinker();
                 }
 
                 else if (currentRoom == Room.medBayRoom)
