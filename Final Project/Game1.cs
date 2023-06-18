@@ -77,11 +77,11 @@ namespace Final_Project
         List<int> cardLocations = new List<int>();
 
         Texture2D yourEscapePodTexture, altEscapePodTexture, dockingBayTexture, escapePodBayTexture, cargoBayTexture, hallway1Texture, hallway2Texture, residenceRoom1Texture, residenceRoom2Texture, messHallRoomTexture, securityRoomTexture, medBayRoomTexture, engineRoomTexture, reactorRoomTexture, logRoomTexture, commRoomTexture, elevatorRoomTexture, captainsQuartersRoomTexture, bridgeTexture, titleScreen;
-        Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture, moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown, circleCursor, BoxFrameTexture, logPanel1Texture, logPanel2Texture, escapePodPanel1Texture, escapePodPanel2Texture, escapePodPanel3Texture, escapePodPanel4Texture, blueKeyCard1Texture, redKeyCard2Texture, yellowKeyCard3Texture, orangeKeyCard4Texture, purpleKeyCard5Texture;
+        Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture, moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown, circleCursor, BoxFrameTexture, logPanel1Texture, logPanel2Texture, escapePodPanel1Texture, escapePodPanel2Texture, escapePodPanel3Texture, escapePodPanel4Texture, blueKeyCard1Texture, redKeyCard2Texture, yellowKeyCard3Texture, orangeKeyCard4Texture, purpleKeyCard5Texture, cardTrackerTexture;
         Texture2D DBmove1, DBmove2, DBmove3;
         Random generator = new Random();
 
-        Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4, locationBoxRect, textBoxRect, storyButtonRect, keyCard1Rect, keyCard2Rect, keyCard3Rect, keyCard4Rect, keyCard5Rect;
+        Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4, locationBoxRect, textBoxRect, storyButtonRect, keyCard1Rect, keyCard2Rect, keyCard3Rect, keyCard4Rect, keyCard5Rect, cardTrackerRect;
         int storyPanelCount = 0, logPanelCount = 0, altEscapePodPanelCount = 0, iconBlinkCounter, keyCardsHeld = 0, keyCard2Location, keyCard3Location, keyCard4Location;
         float timeStamp, elapsedTimeSec;
         bool travelToXunariPrompt = false, onXunari = false, readingShipLogs = false;
@@ -189,6 +189,7 @@ namespace Final_Project
             blueKeyCard1Texture = Content.Load<Texture2D>("blueKeyCard");
             redKeyCard2Texture = Content.Load<Texture2D>("redKeyCard");
             yellowKeyCard3Texture = Content.Load<Texture2D>("yellowKeyCard");
+            cardTrackerTexture = Content.Load<Texture2D>("CornerLog");
 
             // FONTS
             titleReportFont = Content.Load<SpriteFont>("1942Font");
