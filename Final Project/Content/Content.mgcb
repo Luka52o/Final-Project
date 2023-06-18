@@ -71,6 +71,18 @@
 /processorParam:TextureFormat=Color
 /build:altEscapePodPanel4.png
 
+#begin blueKeyCard.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:blueKeyCard.png
+
 #begin bridgeRoom.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -439,6 +451,18 @@
 /processorParam:TextureFormat=Color
 /build:rectangle.png
 
+#begin redKeyCard.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:redKeyCard.png
+
 #begin residenceRoom1.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -534,6 +558,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:xunariMapIcon.png
+
+#begin yellowKeyCard.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:yellowKeyCard.png
 
 #begin yourEscapePodRoom.png
 /importer:TextureImporter
