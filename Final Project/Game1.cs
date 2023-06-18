@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq.Expressions;
 
 namespace Final_Project
@@ -82,7 +83,7 @@ namespace Final_Project
         Random generator = new Random();
 
         Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4, locationBoxRect, textBoxRect, storyButtonRect, keyCard1Rect, keyCard2Rect, keyCard3Rect, keyCard4Rect, keyCard5Rect, cardTrackerRect;
-        int storyPanelCount = 0, logPanelCount = 0, altEscapePodPanelCount = 0, iconBlinkCounter, keyCardsHeld = 0, keyCard2Location, keyCard3Location, keyCard4Location;
+        int storyPanelCount = 0, logPanelCount = 0, altEscapePodPanelCount = 0, iconBlinkCounter, keyCardsHeld = 0, keyCard2Location, keyCard3Location, keyCard4Location, playerRoomNum;
         float timeStamp, elapsedTimeSec;
         bool travelToXunariPrompt = false, onXunari = false, readingShipLogs = false;
 
@@ -1318,5 +1319,6 @@ namespace Final_Project
                 _spriteBatch.Draw(purpleKeyCard5Texture, keyCard5Rect, Color.White);
             }
         }
+            
     }
 }
