@@ -68,6 +68,7 @@ namespace Final_Project
             openBridge,
             end
         }
+        
 
         Story activeTask;
         Screen screen;
@@ -75,17 +76,22 @@ namespace Final_Project
         SpriteFont titleReportFont, generalTextFont;
         MouseState newMouseState, oldMouseState;
         KeyboardState keyboardState;
-        List<int> cardLocations = new List<int>();
+        List<Rectangle> roomRects = new List<Rectangle>();
+        List<Room> rooms = new List<Room>();
 
         Texture2D yourEscapePodTexture, altEscapePodTexture, dockingBayTexture, escapePodBayTexture, cargoBayTexture, hallway1Texture, hallway2Texture, residenceRoom1Texture, residenceRoom2Texture, messHallRoomTexture, securityRoomTexture, medBayRoomTexture, engineRoomTexture, reactorRoomTexture, logRoomTexture, commRoomTexture, elevatorRoomTexture, captainsQuartersRoomTexture, bridgeTexture, titleScreen;
         Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture, moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown, circleCursor, BoxFrameTexture, logPanel1Texture, logPanel2Texture, escapePodPanel1Texture, escapePodPanel2Texture, escapePodPanel3Texture, escapePodPanel4Texture, blueKeyCard1Texture, redKeyCard2Texture, yellowKeyCard3Texture, orangeKeyCard4Texture, purpleKeyCard5Texture, cardTrackerTexture;
         Texture2D DBmove1, DBmove2, DBmove3;
         Random generator = new Random();
 
-        Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4, locationBoxRect, textBoxRect, storyButtonRect, keyCard1Rect, keyCard2Rect, keyCard3Rect, keyCard4Rect, keyCard5Rect, cardTrackerRect;
-        int storyPanelCount = 0, logPanelCount = 0, altEscapePodPanelCount = 0, iconBlinkCounter, keyCardsHeld = 0, keyCard2Location, keyCard3Location, keyCard4Location, playerRoomNum;
+        Point objectiveCardLocation;
+        Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4, locationBoxRect, textBoxRect, storyButtonRect, keyCard1Rect, keyCard2Rect, keyCard3Rect, keyCard4Rect, keyCard5Rect, cardTrackerRect, trackerBlinkerRect;
+        Rectangle dockBayMapRect, podBayMapRect, res1MapRect, res2MapRect, messMapRect, secMapRect, cargoMapRect, hallAMapRect, hallBMapRect, hallCMapRect, hallDMapRect, hallEMapRect, medMapRect, engineMapRect, reactorMapRect, logMapRect, commMapRect;
+        
+        int storyPanelCount = 0, logPanelCount = 0, altEscapePodPanelCount = 0, iconBlinkCounter, cardTrackerBlinker, keyCardsHeld = 0, keyCard2Location, keyCard3Location, keyCard4Location, playerRoomNum;
         float timeStamp, elapsedTimeSec;
-        bool travelToXunariPrompt = false, onXunari = false, readingShipLogs = false;
+        double cardDistanceX, cardDistanceY, cardDistanceVector;
+        bool travelToXunariPrompt = false, onXunari = false, readingShipLogs = false, inRoomWithKeyCard = false;
 
         protected override void Initialize()
         {
@@ -114,6 +120,8 @@ namespace Final_Project
             keyCard3Rect = new Rectangle(1095, 20, 50, 65);
             keyCard4Rect = new Rectangle(1155, 20, 50, 65);
             keyCard5Rect = new Rectangle(1215, 20, 50, 65);
+            cardTrackerRect = new Rectangle(270, 890, 175, 80);
+            trackerBlinkerRect = new Rectangle(cardTrackerRect.Center.X, cardTrackerRect.Center.Y, 20, 20);
 
             escapePodMapIconRect = new Rectangle(700, 810, 20, 20);
             xunariMapRect = new Rectangle(575, 360, 150, 300);
@@ -135,6 +143,8 @@ namespace Final_Project
 
             while (keyCard4Location == keyCard2Location || keyCard4Location == keyCard3Location)
                 keyCard4Location = generator.Next(1, 18);
+
+            LocateRoomMapRects();
 
             base.Initialize();
 
@@ -213,6 +223,28 @@ namespace Final_Project
             keyboardState = Keyboard.GetState();
             iconBlinkCounter++;
 
+            if (activeTask == Story.findKeyCard2 || activeTask == Story.findKeyCard3 || activeTask == Story.findKeyCard4)
+            {
+                cardTrackerBlinker++;
+
+                if (miniMapCurrentRoomRect.Center.X > objectiveCardLocation.X)
+                    cardDistanceX = miniMapCurrentRoomRect.Center.X - objectiveCardLocation.X;
+
+                else if (miniMapCurrentRoomRect.Center.X < objectiveCardLocation.X)
+                    cardDistanceX = objectiveCardLocation.X - miniMapCurrentRoomRect.Center.X;
+
+
+                if (miniMapCurrentRoomRect.Center.Y > objectiveCardLocation.Y)
+                    cardDistanceY = miniMapCurrentRoomRect.Center.Y - objectiveCardLocation.Y;
+
+                else if (miniMapCurrentRoomRect.Center.Y < objectiveCardLocation.Y)
+                    cardDistanceY = objectiveCardLocation.Y - miniMapCurrentRoomRect.Center.Y;
+
+                cardDistanceVector = Math.Sqrt(Math.Pow(cardDistanceX, 2) + Math.Pow(cardDistanceY, 2));
+            }
+
+
+
             if (screen == Screen.Title)
             {
                 if (newMouseState.LeftButton == ButtonState.Pressed && startButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
@@ -250,7 +282,7 @@ namespace Final_Project
                 else if (currentRoom == Room.escapePodBayRoom)
                 {
                     UpdateEscapePodBay();
-                    
+
                     if (activeTask == Story.searchAltEscapePod)
                     {
                         if (newMouseState.LeftButton == ButtonState.Pressed && storyButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
@@ -342,7 +374,7 @@ namespace Final_Project
                         }
                     }
                 }
-                    
+
 
                 else if (currentRoom == Room.altEscapePodRoom)
                 {
@@ -371,6 +403,8 @@ namespace Final_Project
                         activeTask = Story.findKeyCard2;
                         timeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
                         currentRoom = Room.travelling;
+
+                        MarkCardMapLocation();
                     }
                 }
             }
@@ -388,6 +422,21 @@ namespace Final_Project
                     activeTask = Story.goToLogRoom;
                     timeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
                     travelToXunariPrompt = false;
+                }
+            }
+
+            if (inRoomWithKeyCard && newMouseState.LeftButton == ButtonState.Pressed && storyButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+            {
+                inRoomWithKeyCard = false;
+
+                keyCardsHeld++;
+                if (activeTask == Story.findKeyCard2)
+                {
+                    activeTask = Story.findKeyCard3;
+                }
+                else if (activeTask == Story.findKeyCard3)
+                {
+                    activeTask = Story.findKeyCard4;
                 }
             }
 
@@ -429,7 +478,6 @@ namespace Final_Project
                 _spriteBatch.Draw(yourEscapePodTexture, backgroundRect, Color.White);
 
                 _spriteBatch.Draw(rectangleButtonTexture, storyTextBox, Color.Black);
-                _spriteBatch.Draw(closeButtonTexture, closeButtonRect, Color.White);
                 _spriteBatch.Draw(xunariMapIconTexture, xunariMapRect, Color.White);
 
                 if (iconBlinkCounter > 60)
@@ -447,6 +495,8 @@ namespace Final_Project
                 {
                     _spriteBatch.DrawString(generalTextFont, "Travel to The Xunari? [ENTER]", new Vector2(440, 650), Color.Olive);
                 }
+
+                _spriteBatch.Draw(closeButtonTexture, closeButtonRect, Color.White);
             }
 
 
@@ -688,7 +738,7 @@ namespace Final_Project
                 {
                     _spriteBatch.Draw(hallway1Texture, backgroundRect, Color.White);
                     _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
-                    _spriteBatch.DrawString(generalTextFont, "Hall B", new Vector2(57, 920), Color.Olive);
+                    _spriteBatch.DrawString(generalTextFont, "Hall D", new Vector2(57, 920), Color.Olive);
 
                     if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
                     {
@@ -856,6 +906,52 @@ namespace Final_Project
                 _spriteBatch.Draw(BoxFrameTexture, locationBoxRect, Color.White);
             }
 
+            if (inRoomWithKeyCard)
+            {
+                _spriteBatch.Draw(rectangleButtonTexture, storyButtonRect, Color.Black);
+                _spriteBatch.DrawString(generalTextFont, "Take Key Card", new Vector2(610, 730), Color.Olive);
+            }
+
+            if (activeTask == Story.findKeyCard2)
+            {
+                for (int i = 1; i < 18; i++)
+                {
+                    if (keyCard2Location == i && currentRoom == rooms[i])
+                    {
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.DarkRed);
+                        storyButtonRect = new Rectangle(600, 700, 300, 100);
+                        inRoomWithKeyCard = true;
+
+                    }
+                }
+            }
+            else if (activeTask == Story.findKeyCard3)
+            {
+                for (int i = 1; i < 18; i++)
+                {
+                    if (keyCard3Location == i && currentRoom == rooms[i])
+                    {
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.DarkRed);
+                        storyButtonRect = new Rectangle(600, 700, 300, 100);
+                        inRoomWithKeyCard = true;
+
+                    }
+                }
+            }
+            else if (activeTask == Story.findKeyCard4)
+            {
+                for (int i = 1; i < 18; i++)
+                {
+                    if (keyCard4Location == i && currentRoom == rooms[i])
+                    {
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.DarkRed);
+                        storyButtonRect = new Rectangle(600, 700, 300, 100);
+                        inRoomWithKeyCard = true;
+
+                    }
+                }
+            }
+            TrackerIndicator();
             DrawKeyCards();
 
             _spriteBatch.End();
@@ -964,7 +1060,7 @@ namespace Final_Project
                     currentRoom = Room.residenceRoom1;
                 }
             }
-            
+
         }
 
         public void UpdateHallwayB()
@@ -1287,38 +1383,173 @@ namespace Final_Project
 
         public void DrawKeyCards()
         {
-            if (keyCardsHeld == 1)
+            if (currentRoom != Room.travelling)
             {
-                _spriteBatch.Draw(blueKeyCard1Texture, keyCard1Rect, Color.White);
-            }
-            else if (keyCardsHeld == 2)
-            {
-                _spriteBatch.Draw(blueKeyCard1Texture, keyCard1Rect, Color.White);
-                _spriteBatch.Draw(redKeyCard2Texture, keyCard2Rect, Color.White);
-            }
-            else if (keyCardsHeld == 3)
-            {
-                _spriteBatch.Draw(blueKeyCard1Texture, keyCard1Rect, Color.White);
-                _spriteBatch.Draw(redKeyCard2Texture, keyCard2Rect, Color.White);
-                _spriteBatch.Draw(yellowKeyCard3Texture, keyCard3Rect, Color.White);
-            }
-            else if (keyCardsHeld == 4)
-            {
-                _spriteBatch.Draw(blueKeyCard1Texture, keyCard1Rect, Color.White);
-                _spriteBatch.Draw(redKeyCard2Texture, keyCard2Rect, Color.White);
-                _spriteBatch.Draw(yellowKeyCard3Texture, keyCard3Rect, Color.White);
-                _spriteBatch.Draw(orangeKeyCard4Texture, keyCard4Rect, Color.White);
+                if (keyCardsHeld == 1)
+                {
+                    _spriteBatch.Draw(blueKeyCard1Texture, keyCard1Rect, Color.White);
+                }
+                else if (keyCardsHeld == 2)
+                {
+                    _spriteBatch.Draw(blueKeyCard1Texture, keyCard1Rect, Color.White);
+                    _spriteBatch.Draw(redKeyCard2Texture, keyCard2Rect, Color.White);
+                }
+                else if (keyCardsHeld == 3)
+                {
+                    _spriteBatch.Draw(blueKeyCard1Texture, keyCard1Rect, Color.White);
+                    _spriteBatch.Draw(redKeyCard2Texture, keyCard2Rect, Color.White);
+                    _spriteBatch.Draw(yellowKeyCard3Texture, keyCard3Rect, Color.White);
+                }
+                else if (keyCardsHeld == 4)
+                {
+                    _spriteBatch.Draw(blueKeyCard1Texture, keyCard1Rect, Color.White);
+                    _spriteBatch.Draw(redKeyCard2Texture, keyCard2Rect, Color.White);
+                    _spriteBatch.Draw(yellowKeyCard3Texture, keyCard3Rect, Color.White);
+                    _spriteBatch.Draw(orangeKeyCard4Texture, keyCard4Rect, Color.White);
 
-            }
-            else if (keyCardsHeld == 5)
-            {
-                _spriteBatch.Draw(blueKeyCard1Texture, keyCard1Rect, Color.White);
-                _spriteBatch.Draw(redKeyCard2Texture, keyCard2Rect, Color.White);
-                _spriteBatch.Draw(yellowKeyCard3Texture, keyCard3Rect, Color.White);
-                _spriteBatch.Draw(orangeKeyCard4Texture, keyCard4Rect, Color.White);
-                _spriteBatch.Draw(purpleKeyCard5Texture, keyCard5Rect, Color.White);
+                }
+                else if (keyCardsHeld == 5)
+                {
+                    _spriteBatch.Draw(blueKeyCard1Texture, keyCard1Rect, Color.White);
+                    _spriteBatch.Draw(redKeyCard2Texture, keyCard2Rect, Color.White);
+                    _spriteBatch.Draw(yellowKeyCard3Texture, keyCard3Rect, Color.White);
+                    _spriteBatch.Draw(orangeKeyCard4Texture, keyCard4Rect, Color.White);
+                    _spriteBatch.Draw(purpleKeyCard5Texture, keyCard5Rect, Color.White);
+                }
             }
         }
-            
+
+        public void MarkCardMapLocation()
+        {
+            if (activeTask == Story.findKeyCard2)
+            {
+                for (int i = 1; i < 18; i++)
+                {
+                    if (keyCard2Location == i)
+                    {
+                        objectiveCardLocation = roomRects[i].Center;
+                    }
+                }
+            }
+            else if (activeTask == Story.findKeyCard3)
+            {
+                for (int i = 1; i < 18; i++)
+                {
+                    if (keyCard3Location == i)
+                    {
+                        objectiveCardLocation = roomRects[i].Center;
+                    }
+                }
+            }
+            else if (activeTask == Story.findKeyCard4)
+            {
+                for (int i = 1; i < 18; i++)
+                {
+                    if (keyCard4Location == i)
+                    {
+                        objectiveCardLocation = roomRects[i].Center;
+                    }
+                }
+            }
+        }
+
+        public void LocateRoomMapRects()
+        {
+            roomRects.Add(dockBayMapRect = new Rectangle(1024, 942, 234, 31));
+            roomRects.Add(podBayMapRect = new Rectangle(1032, 895, 30, 30));
+            roomRects.Add(res1MapRect = new Rectangle(1032, 807, 30, 30));
+            roomRects.Add(res2MapRect = new Rectangle(1079, 767, 30, 30));
+            roomRects.Add(messMapRect = new Rectangle(1069, 807, 50, 84));
+            roomRects.Add(secMapRect = new Rectangle(1126, 807, 30, 30));
+            roomRects.Add(cargoMapRect = new Rectangle(1126, 895, 30, 30));
+            roomRects.Add(hallAMapRect = new Rectangle(1040, 840, 14, 49));
+            roomRects.Add(hallBMapRect = new Rectangle(1069, 903, 49, 14));
+            roomRects.Add(hallCMapRect = new Rectangle(1161, 858, 49, 14));
+            roomRects.Add(hallDMapRect = new Rectangle(1162, 815, 49, 14));
+            roomRects.Add(hallEMapRect = new Rectangle());                       // incomplete
+            roomRects.Add(medMapRect = new Rectangle(1216, 806, 30, 30));
+            roomRects.Add(engineMapRect = new Rectangle(1170, 895, 30, 30));
+            roomRects.Add(reactorMapRect = new Rectangle(1215, 895, 30, 30));
+            roomRects.Add(logMapRect = new Rectangle(1126, 850, 30, 30));
+            roomRects.Add(commMapRect = new Rectangle(1217, 849, 30, 30));
+
+            rooms.Add(Room.dockingBayRoom);
+            rooms.Add(Room.escapePodBayRoom);
+            rooms.Add(Room.residenceRoom1);
+            rooms.Add(Room.residenceRoom2);
+            rooms.Add(Room.messHallRoom);
+            rooms.Add(Room.securityRoom);
+            rooms.Add(Room.cargoBayRoom);
+            rooms.Add(Room.hallwayARoom);
+            rooms.Add(Room.hallwayBRoom);
+            rooms.Add(Room.hallwayCRoom);
+            rooms.Add(Room.hallwayDRoom);
+            rooms.Add(Room.hallwayERoom);
+            rooms.Add(Room.medBayRoom);
+            rooms.Add(Room.engineRoom);
+            rooms.Add(Room.reactorRoom);
+            rooms.Add(Room.logRoom);
+            rooms.Add(Room.commRoom);
+
+        }
+
+        public void TrackerIndicator()
+        {
+            if (activeTask == Story.findKeyCard2 || activeTask == Story.findKeyCard3 || activeTask == Story.findKeyCard4 && currentRoom != Room.travelling)
+            {
+                _spriteBatch.Draw(cardTrackerTexture, cardTrackerRect, Color.White);
+
+                if (cardDistanceVector >= 175 && !inRoomWithKeyCard)
+                {
+                    if (cardTrackerBlinker < 60)
+                    {
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.Black);
+                    }
+                    else if (cardTrackerBlinker > 60 && cardTrackerBlinker < 120)
+                    {
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.DarkRed);
+                    }
+                    else if (cardTrackerBlinker >= 120)
+                    {
+                        cardTrackerBlinker = 0;
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.Black);
+                    }
+                }
+
+                else if (cardDistanceVector < 150 && cardDistanceVector > 100 && !inRoomWithKeyCard)
+                {
+                    if (cardTrackerBlinker < 30)
+                    {
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.Black);
+                    }
+                    else if (cardTrackerBlinker > 30 && cardTrackerBlinker < 60)
+                    {
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.DarkRed);
+                    }
+                    else if (cardTrackerBlinker >= 60)
+                    {
+                        cardTrackerBlinker = 0;
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.Black);
+                    }
+                }
+
+                else if (cardDistanceVector <= 100 && cardDistanceVector > 1 && !inRoomWithKeyCard)
+                {
+                    if (cardTrackerBlinker < 15)
+                    {
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.Black);
+                    }
+                    else if (cardTrackerBlinker > 15 && cardTrackerBlinker < 30)
+                    {
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.DarkRed);
+                    }
+                    else if (cardTrackerBlinker >= 30)
+                    {
+                        cardTrackerBlinker = 0;
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.Black);
+                    }
+                }
+            }
+        }
     }
 }
