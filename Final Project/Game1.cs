@@ -65,6 +65,7 @@ namespace Final_Project
             findKeyCard2,
             findKeyCard3,
             findKeyCard4,
+            findKeyCard5,
             openBridge,
             end
         }
@@ -200,6 +201,8 @@ namespace Final_Project
             blueKeyCard1Texture = Content.Load<Texture2D>("blueKeyCard");
             redKeyCard2Texture = Content.Load<Texture2D>("redKeyCard");
             yellowKeyCard3Texture = Content.Load<Texture2D>("yellowKeyCard");
+            orangeKeyCard4Texture = Content.Load<Texture2D>("orangeKeyCard");
+            purpleKeyCard5Texture = Content.Load<Texture2D>("purpleKeyCard");
             cardTrackerTexture = Content.Load<Texture2D>("CornerLog");
 
             // FONTS
@@ -267,7 +270,7 @@ namespace Final_Project
             }
 
             else if (screen == Screen.Game)
-            {
+            {   
                 if (currentRoom == Room.yourEscapePodRoom)
                 {
                     if (newMouseState.LeftButton == ButtonState.Pressed && mapButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
@@ -386,7 +389,10 @@ namespace Final_Project
                     if (newMouseState.LeftButton == ButtonState.Pressed && storyButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                     {
                         if (activeTask == Story.searchAltEscapePod)
+                        {
                             keyCardsHeld++;
+                            inRoomWithKeyCard = false;
+                        }
 
                         activeTask = Story.findKeyCard1;
                     }
@@ -438,7 +444,13 @@ namespace Final_Project
                 {
                     activeTask = Story.findKeyCard4;
                 }
+                else if (activeTask == Story.findKeyCard4)
+                {
+                    objectiveCardLocation = new Point(1275, 806);
+                    activeTask = Story.findKeyCard5;
+                }
             }
+            
 
             oldMouseState = newMouseState;
             base.Update(gameTime);
@@ -912,45 +924,8 @@ namespace Final_Project
                 _spriteBatch.DrawString(generalTextFont, "Take Key Card", new Vector2(610, 730), Color.Olive);
             }
 
-            if (activeTask == Story.findKeyCard2)
-            {
-                for (int i = 1; i < 18; i++)
-                {
-                    if (keyCard2Location == i && currentRoom == rooms[i])
-                    {
-                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.DarkRed);
-                        storyButtonRect = new Rectangle(600, 700, 300, 100);
-                        inRoomWithKeyCard = true;
+            
 
-                    }
-                }
-            }
-            else if (activeTask == Story.findKeyCard3)
-            {
-                for (int i = 1; i < 18; i++)
-                {
-                    if (keyCard3Location == i && currentRoom == rooms[i])
-                    {
-                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.DarkRed);
-                        storyButtonRect = new Rectangle(600, 700, 300, 100);
-                        inRoomWithKeyCard = true;
-
-                    }
-                }
-            }
-            else if (activeTask == Story.findKeyCard4)
-            {
-                for (int i = 1; i < 18; i++)
-                {
-                    if (keyCard4Location == i && currentRoom == rooms[i])
-                    {
-                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.DarkRed);
-                        storyButtonRect = new Rectangle(600, 700, 300, 100);
-                        inRoomWithKeyCard = true;
-
-                    }
-                }
-            }
             TrackerIndicator();
             DrawKeyCards();
 
@@ -968,8 +943,8 @@ namespace Final_Project
 
 
 
-
-
+        // ///////////////////////////////////////
+        // ///////////////////////////////////////
         // ///////////////////////////////////////
         // ALT METHODS
 
@@ -1495,7 +1470,7 @@ namespace Final_Project
 
         public void TrackerIndicator()
         {
-            if (activeTask == Story.findKeyCard2 || activeTask == Story.findKeyCard3 || activeTask == Story.findKeyCard4 && currentRoom != Room.travelling)
+            if (activeTask == Story.findKeyCard2 || activeTask == Story.findKeyCard3 || activeTask == Story.findKeyCard4 && currentRoom != Room.travelling && !inRoomWithKeyCard)
             {
                 _spriteBatch.Draw(cardTrackerTexture, cardTrackerRect, Color.White);
 
@@ -1547,6 +1522,42 @@ namespace Final_Project
                     {
                         cardTrackerBlinker = 0;
                         _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.Black);
+                    }
+                }
+                
+            }
+            if (activeTask == Story.findKeyCard2)
+            {
+                for (int i = 1; i < 18; i++)
+                {
+                    if (keyCard2Location == i && currentRoom == rooms[i])
+                    {
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.DarkRed);
+                        storyButtonRect = new Rectangle(600, 700, 300, 100);
+                        inRoomWithKeyCard = true;
+
+                    }
+                }
+            }
+            else if (activeTask == Story.findKeyCard3)
+            {
+                for (int i = 1; i < 18; i++)
+                {
+                    if (keyCard3Location == i && currentRoom == rooms[i])
+                    {
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.DarkRed);
+                        inRoomWithKeyCard = true;
+                    }
+                }
+            }
+            else if (activeTask == Story.findKeyCard4)
+            {
+                for (int i = 1; i < 18; i++)
+                {
+                    if (keyCard4Location == i && currentRoom == rooms[i])
+                    {
+                        _spriteBatch.Draw(circleIconTexture, trackerBlinkerRect, Color.DarkRed);
+                        inRoomWithKeyCard = true;
                     }
                 }
             }
