@@ -28,6 +28,7 @@ namespace Final_Project
             Story,
             Game,
             EscapePodMap,
+            end
         }
         enum Room
         {
@@ -87,7 +88,7 @@ namespace Final_Project
 
         Point objectiveCardLocation;
         Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4, locationBoxRect, textBoxRect, storyButtonRect, keyCard1Rect, keyCard2Rect, keyCard3Rect, keyCard4Rect, keyCard5Rect, cardTrackerRect, trackerBlinkerRect;
-        Rectangle dockBayMapRect, podBayMapRect, res1MapRect, res2MapRect, messMapRect, secMapRect, cargoMapRect, hallAMapRect, hallBMapRect, hallCMapRect, hallDMapRect, hallEMapRect, medMapRect, engineMapRect, reactorMapRect, logMapRect, commMapRect;
+        Rectangle dockBayMapRect, podBayMapRect, res1MapRect, res2MapRect, messMapRect, secMapRect, cargoMapRect, hallAMapRect, hallBMapRect, hallCMapRect, hallDMapRect, hallEMapRect, medMapRect, engineMapRect, reactorMapRect, logMapRect, commMapRect, elevatorBlinkerRect;
         
         int storyPanelCount = 0, logPanelCount = 0, altEscapePodPanelCount = 0, iconBlinkCounter, cardTrackerBlinker, keyCardsHeld = 0, keyCard2Location, keyCard3Location, keyCard4Location, playerRoomNum;
         float timeStamp, elapsedTimeSec;
@@ -123,6 +124,7 @@ namespace Final_Project
             keyCard5Rect = new Rectangle(1215, 20, 50, 65);
             cardTrackerRect = new Rectangle(270, 890, 175, 80);
             trackerBlinkerRect = new Rectangle(cardTrackerRect.Center.X, cardTrackerRect.Center.Y, 20, 20);
+            elevatorBlinkerRect = new Rectangle(1200, 150, 200, 500);
 
             escapePodMapIconRect = new Rectangle(700, 810, 20, 20);
             xunariMapRect = new Rectangle(575, 360, 150, 300);
@@ -226,6 +228,7 @@ namespace Final_Project
             keyboardState = Keyboard.GetState();
             iconBlinkCounter++;
 
+            // CALCULATE CARD DISTANCE VECTOR
             if (activeTask == Story.findKeyCard2 || activeTask == Story.findKeyCard3 || activeTask == Story.findKeyCard4)
             {
                 cardTrackerBlinker++;
@@ -246,8 +249,8 @@ namespace Final_Project
                 cardDistanceVector = Math.Sqrt(Math.Pow(cardDistanceX, 2) + Math.Pow(cardDistanceY, 2));
             }
 
-
-
+            ////////////////////////////////////////
+            // SCREENS
             if (screen == Screen.Title)
             {
                 if (newMouseState.LeftButton == ButtonState.Pressed && startButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
@@ -270,7 +273,7 @@ namespace Final_Project
             }
 
             else if (screen == Screen.Game)
-            {   
+            {
                 if (currentRoom == Room.yourEscapePodRoom)
                 {
                     if (newMouseState.LeftButton == ButtonState.Pressed && mapButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
@@ -279,6 +282,8 @@ namespace Final_Project
                     }
                 }
 
+                //////////////////////////////////////////////
+                // ROOMS
                 else if (currentRoom == Room.dockingBayRoom)
                     UpdateDockingBay();
 
@@ -351,33 +356,47 @@ namespace Final_Project
                 else if (currentRoom == Room.hallwayDRoom)
                     UpdateHallwayD();
 
+                else if (currentRoom == Room.hallwayERoom)
+                {
+                    UpdateHallwayE();
+
+                    if (activeTask == Story.openBridge)
+                    {
+                        if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                        {
+                            currentRoom = Room.bridgeRoom;
+                        }
+                    }
+
+                }
+
                 else if (currentRoom == Room.medBayRoom)
                     UpdateMedBay();
 
-                else if (currentRoom == Room.travelling)
-                {
-                    elapsedTimeSec = (float)gameTime.TotalGameTime.TotalSeconds - timeStamp;
+                else if (currentRoom == Room.elevatorRoom)
+                    UpdateElevator();
 
-                    if (elapsedTimeSec >= 4)
+                else if (currentRoom == Room.captainsQuartersRoom)
+                {
+                    UpdateCaptainsQuarters();
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && storyButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                     {
-                        if (activeTask == Story.start)
-                        {
-                            currentRoom = Room.dockingBayRoom;
-                            onXunari = true;
-                        }
-                        else if (activeTask == Story.searchAltEscapePod)
-                        {
-                            currentRoom = Room.altEscapePodRoom;
-                            onXunari = false;
-                        }
-                        else if (activeTask == Story.findKeyCard2)
-                        {
-                            currentRoom = Room.dockingBayRoom;
-                            onXunari = true;
-                        }
+                        activeTask = Story.openBridge;
+                        keyCardsHeld++;
                     }
                 }
 
+                else if (currentRoom == Room.bridgeRoom)
+                {
+                    UpdateBridge();
+
+                    if (newMouseState.LeftButton == ButtonState.Pressed && storyButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                    {
+                        activeTask = Story.end;
+                        screen = Screen.end;
+                    }
+                }
 
                 else if (currentRoom == Room.altEscapePodRoom)
                 {
@@ -413,6 +432,31 @@ namespace Final_Project
                         MarkCardMapLocation();
                     }
                 }
+
+                else if (currentRoom == Room.travelling)
+                {
+                    elapsedTimeSec = (float)gameTime.TotalGameTime.TotalSeconds - timeStamp;
+
+                    if (elapsedTimeSec >= 4)
+                    {
+                        if (activeTask == Story.start)
+                        {
+                            currentRoom = Room.dockingBayRoom;
+                            onXunari = true;
+                        }
+                        else if (activeTask == Story.searchAltEscapePod)
+                        {
+                            currentRoom = Room.altEscapePodRoom;
+                            onXunari = false;
+                        }
+                        else if (activeTask == Story.findKeyCard2)
+                        {
+                            currentRoom = Room.dockingBayRoom;
+                            onXunari = true;
+                        }
+                    }
+                }
+
             }
             else if (screen == Screen.EscapePodMap)
             {
@@ -430,6 +474,12 @@ namespace Final_Project
                     travelToXunariPrompt = false;
                 }
             }
+
+            else if (screen == Screen.end)
+            {
+
+            }
+
 
             if (inRoomWithKeyCard && newMouseState.LeftButton == ButtonState.Pressed && storyButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
             {
@@ -465,6 +515,8 @@ namespace Final_Project
 
             _spriteBatch.Begin();
 
+            ///////////////////////////////////////////////////
+            // SCREENS
             if (screen == Screen.Title)
             {
                 _spriteBatch.Draw(titleScreen, backgroundRect, Color.White);
@@ -511,10 +563,10 @@ namespace Final_Project
                 _spriteBatch.Draw(closeButtonTexture, closeButtonRect, Color.White);
             }
 
-
-
             else if (screen == Screen.Game)
             {
+                // //////////////////////////////////////////
+                // ROOMS
                 if (currentRoom == Room.yourEscapePodRoom)
                 {
                     _spriteBatch.Draw(yourEscapePodTexture, backgroundRect, Color.White);
@@ -724,7 +776,10 @@ namespace Final_Project
                     {
                         _spriteBatch.Draw(moveCursorLeft, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
                     }
-
+                    else if (moveRoomRect4.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        _spriteBatch.Draw(moveCursorUp, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
+                    }
                     RunMapBlinker();
                 }
 
@@ -757,6 +812,24 @@ namespace Final_Project
                         _spriteBatch.Draw(moveCursorUp, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
                     }
                     else if (moveRoomRect3.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        _spriteBatch.Draw(moveCursorDown, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
+                    }
+
+                    RunMapBlinker();
+                }
+
+                else if (currentRoom == Room.hallwayERoom)
+                {
+                    _spriteBatch.Draw(hallway1Texture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(miniMapTexture, miniMapRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Hall E", new Vector2(57, 920), Color.Olive);
+
+                    if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        _spriteBatch.Draw(moveCursorUp, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
+                    }
+                    else if (moveRoomRect2.Contains(newMouseState.X, newMouseState.Y))
                     {
                         _spriteBatch.Draw(moveCursorDown, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
                     }
@@ -867,7 +940,71 @@ namespace Final_Project
                         _spriteBatch.Draw(moveCursorRight, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
                     }
 
+                    if (activeTask == Story.findKeyCard5)
+                    {
+                        if (iconBlinkCounter < 15)
+                        {
+                            _spriteBatch.Draw(rectangleButtonTexture, elevatorBlinkerRect, Color.Black);
+                        }
+                        else if (iconBlinkCounter > 15 && iconBlinkCounter < 30)
+                        {
+                            _spriteBatch.Draw(rectangleButtonTexture, elevatorBlinkerRect, Color.DarkRed);
+                        }
+                        else if (iconBlinkCounter >= 30)
+                        {
+                            iconBlinkCounter = 0;
+                            _spriteBatch.Draw(rectangleButtonTexture, elevatorBlinkerRect, Color.Black);
+                        }
+                    }
+                    
                     RunMapBlinker();
+                }
+
+                else if (currentRoom == Room.elevatorRoom)
+                {
+                    _spriteBatch.Draw(elevatorRoomTexture, backgroundRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Elevator", new Vector2(57, 920), Color.Olive);
+
+                    if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        _spriteBatch.Draw(moveCursorDown, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
+                    }
+                    else if (moveRoomRect2.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        _spriteBatch.Draw(moveCursorDown, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
+                    }
+                }
+
+                else if (currentRoom == Room.captainsQuartersRoom)
+                {
+                    _spriteBatch.Draw(residenceRoom2Texture, backgroundRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Captain's Quarters", new Vector2(35, 920), Color.Olive);
+
+                    if (moveRoomRect1.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        _spriteBatch.Draw(moveCursorDown, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
+                    }
+
+                    if (activeTask == Story.findKeyCard5)
+                    {
+                        _spriteBatch.Draw(rectangleButtonTexture, storyButtonRect, Color.Black);
+                        _spriteBatch.DrawString(generalTextFont, "Take Key Card", new Vector2(610, 730), Color.Olive);
+                    }
+                    else if (activeTask == Story.openBridge)
+                    {
+                        _spriteBatch.Draw(BoxFrameTexture, textBoxRect, Color.White);
+                        _spriteBatch.Draw(rectangleButtonTexture, textBoxRect, Color.Black);
+                        _spriteBatch.DrawString(generalTextFont, "Now I can open the bridge doors.", new Vector2(20, 20), Color.Olive);
+                    }
+                }
+
+                else if (currentRoom == Room.bridgeRoom)
+                {
+                    _spriteBatch.Draw(bridgeTexture, backgroundRect, Color.White);
+
+                    _spriteBatch.Draw(rectangleButtonTexture, storyButtonRect, Color.Black);
+                    _spriteBatch.Draw(BoxFrameTexture, storyButtonRect, Color.White);
+                    _spriteBatch.DrawString(generalTextFont, "Send Distress Call", new Vector2(610, 730), Color.Olive);
                 }
 
                 else if (currentRoom == Room.altEscapePodRoom)
@@ -908,6 +1045,8 @@ namespace Final_Project
                 }
             }
 
+            /////////////////////////////////////////////////////////
+            // OTHER
             if (!moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && !moveRoomRect2.Contains(newMouseState.X, newMouseState.Y) && !moveRoomRect3.Contains(newMouseState.X, newMouseState.Y) && !moveRoomRect4.Contains(newMouseState.X, newMouseState.Y))
             {
                 _spriteBatch.Draw(circleCursor, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
@@ -924,23 +1063,17 @@ namespace Final_Project
                 _spriteBatch.DrawString(generalTextFont, "Take Key Card", new Vector2(610, 730), Color.Olive);
             }
 
-            
-
-            TrackerIndicator();
-            DrawKeyCards();
+            if (currentRoom != Room.bridgeRoom)
+            {
+                TrackerIndicator();
+                DrawKeyCards();
+            }
+           
 
             _spriteBatch.End();
 
             base.Draw(gameTime);
         }
-
-
-
-
-
-
-
-
 
 
         // ///////////////////////////////////////
@@ -1289,11 +1422,11 @@ namespace Final_Project
                 prevRoom = currentRoom;
                 currentRoom = Room.commRoom;
             }
-            //else if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect3.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
-            //{
-            //    prevRoom = currentRoom;
-            //    currentRoom = Room.elevatorRoom;
-            //}
+            else if (activeTask == Story.findKeyCard5 && newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect3.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+            {
+                prevRoom = currentRoom;
+                currentRoom = Room.elevatorRoom;
+            }
         }
 
         public void UpdateHallwayD()
@@ -1331,13 +1464,31 @@ namespace Final_Project
             }
         }
 
+        public void UpdateHallwayE()
+        {
+            miniMapCurrentRoomRect = new Rectangle(1134, 749, 14, 49);
+            moveRoomRect1 = new Rectangle(720, 150, 300, 500);
+            moveRoomRect2 = new Rectangle(375, 775, 500, 215); // bottom wide
+            moveRoomRect3 = new Rectangle();
+            moveRoomRect4 = new Rectangle();
+
+            if (activeTask == Story.findKeyCard5 && newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+            {
+                currentRoom = Room.bridgeRoom;
+            }
+            else if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect2.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+            {
+                currentRoom = Room.securityRoom;
+            }
+        }
+
         public void UpdateSecurityRoom()
         {
             miniMapCurrentRoomRect = new Rectangle(1126, 807, 30, 30);
             moveRoomRect1 = new Rectangle(950, 190, 300, 500); // right side long
             moveRoomRect2 = new Rectangle(375, 775, 500, 215); // bottom wide
             moveRoomRect3 = new Rectangle(30, 180, 300, 500); // left side long
-            moveRoomRect4 = new Rectangle(); // will need to do this, drawing is wrong
+            moveRoomRect4 = new Rectangle(375, 100, 500, 215); // top wide
 
             if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
             {
@@ -1354,7 +1505,53 @@ namespace Final_Project
                 prevRoom = currentRoom;
                 currentRoom = Room.messHallRoom;
             }
+            else if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect4.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+            {
+                prevRoom = currentRoom;
+                currentRoom = Room.hallwayERoom;
+            }
         }
+
+        public void UpdateElevator()
+        {
+            moveRoomRect1 = new Rectangle(620, 150, 300, 500);
+            moveRoomRect2 = new Rectangle(375, 775, 500, 215); // bottom wide
+            moveRoomRect3 = new Rectangle();
+            moveRoomRect4 = new Rectangle();
+
+            if (activeTask == Story.findKeyCard5 && newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+            {
+                currentRoom = Room.captainsQuartersRoom;
+            }
+            else if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect2.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+            {
+                currentRoom = Room.medBayRoom;
+            }
+        }
+
+        public void UpdateCaptainsQuarters()
+        {
+            moveRoomRect1 = new Rectangle(375, 775, 500, 215); // bottom wide
+            moveRoomRect2 = new Rectangle();
+            moveRoomRect3 = new Rectangle();
+            moveRoomRect4 = new Rectangle();
+
+            if (newMouseState.LeftButton == ButtonState.Pressed && moveRoomRect1.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+            {
+                prevRoom = currentRoom;
+                currentRoom = Room.elevatorRoom;
+            }
+        }
+
+        public void UpdateBridge()
+        {
+            moveRoomRect1 = new Rectangle();
+            moveRoomRect2 = new Rectangle();
+            moveRoomRect3 = new Rectangle();
+            moveRoomRect4 = new Rectangle();
+        }
+
+        // ////////////////////////////////
 
         public void DrawKeyCards()
         {
