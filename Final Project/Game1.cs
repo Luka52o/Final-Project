@@ -28,7 +28,9 @@ namespace Final_Project
             Story,
             Game,
             EscapePodMap,
-            end
+            Hiding,
+            end,
+            outro
         }
         enum Room
         {
@@ -77,23 +79,24 @@ namespace Final_Project
         Room currentRoom, prevRoom;
         SpriteFont titleReportFont, generalTextFont;
         MouseState newMouseState, oldMouseState;
-        KeyboardState keyboardState;
+        KeyboardState newKeyboardState, oldKeyboardState;
         List<Rectangle> roomRects = new List<Rectangle>();
         List<Room> rooms = new List<Room>();
+        List<string> quicktimeLetters = new List<string>();
 
         Texture2D yourEscapePodTexture, altEscapePodTexture, dockingBayTexture, escapePodBayTexture, cargoBayTexture, hallway1Texture, hallway2Texture, residenceRoom1Texture, residenceRoom2Texture, messHallRoomTexture, securityRoomTexture, medBayRoomTexture, engineRoomTexture, reactorRoomTexture, logRoomTexture, commRoomTexture, elevatorRoomTexture, captainsQuartersRoomTexture, bridgeTexture, titleScreen;
-        Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture, moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown, circleCursor, BoxFrameTexture, logPanel1Texture, logPanel2Texture, escapePodPanel1Texture, escapePodPanel2Texture, escapePodPanel3Texture, escapePodPanel4Texture, blueKeyCard1Texture, redKeyCard2Texture, yellowKeyCard3Texture, orangeKeyCard4Texture, purpleKeyCard5Texture, cardTrackerTexture;
+        Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture, moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown, circleCursor, BoxFrameTexture, logPanel1Texture, logPanel2Texture, escapePodPanel1Texture, escapePodPanel2Texture, escapePodPanel3Texture, escapePodPanel4Texture, blueKeyCard1Texture, redKeyCard2Texture, yellowKeyCard3Texture, orangeKeyCard4Texture, purpleKeyCard5Texture, cardTrackerTexture, bridgeStoryPanel1Texture, bridgeStoryPanel2Texture, panelButtonTexture;
         Texture2D DBmove1, DBmove2, DBmove3;
         Random generator = new Random();
 
         Point objectiveCardLocation;
-        Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4, locationBoxRect, textBoxRect, storyButtonRect, keyCard1Rect, keyCard2Rect, keyCard3Rect, keyCard4Rect, keyCard5Rect, cardTrackerRect, trackerBlinkerRect;
+        Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4, locationBoxRect, textBoxRect, storyButtonRect, keyCard1Rect, keyCard2Rect, keyCard3Rect, keyCard4Rect, keyCard5Rect, cardTrackerRect, trackerBlinkerRect, endStoryYesButtonRect, endStoryNoButtonRect;
         Rectangle dockBayMapRect, podBayMapRect, res1MapRect, res2MapRect, messMapRect, secMapRect, cargoMapRect, hallAMapRect, hallBMapRect, hallCMapRect, hallDMapRect, hallEMapRect, medMapRect, engineMapRect, reactorMapRect, logMapRect, commMapRect, elevatorBlinkerRect;
-        
-        int storyPanelCount = 0, logPanelCount = 0, altEscapePodPanelCount = 0, iconBlinkCounter, cardTrackerBlinker, keyCardsHeld = 0, keyCard2Location, keyCard3Location, keyCard4Location, playerRoomNum;
+
+        int storyPanelCount = 0, logPanelCount = 0, altEscapePodPanelCount = 0, iconBlinkCounter, cardTrackerBlinker, keyCardsHeld = 0, keyCard2Location, keyCard3Location, keyCard4Location, playerRoomNum, endStoryPanelCount = 0, endTextFlasherCount = 0;
         float timeStamp, elapsedTimeSec;
         double cardDistanceX, cardDistanceY, cardDistanceVector;
-        bool travelToXunariPrompt = false, onXunari = false, readingShipLogs = false, inRoomWithKeyCard = false;
+        bool travelToXunariPrompt = false, onXunari = false, readingShipLogs = false, inRoomWithKeyCard = false, endYesSelected = false, endNoSelected = false;
 
         protected override void Initialize()
         {
@@ -148,6 +151,7 @@ namespace Final_Project
                 keyCard4Location = generator.Next(1, 18);
 
             LocateRoomMapRects();
+            AddQuickTimeKeys();
 
             base.Initialize();
 
@@ -206,6 +210,9 @@ namespace Final_Project
             orangeKeyCard4Texture = Content.Load<Texture2D>("orangeKeyCard");
             purpleKeyCard5Texture = Content.Load<Texture2D>("purpleKeyCard");
             cardTrackerTexture = Content.Load<Texture2D>("CornerLog");
+            bridgeStoryPanel1Texture = Content.Load<Texture2D>("bridgePanel1");
+            bridgeStoryPanel2Texture = Content.Load<Texture2D>("bridgePanel2");
+            panelButtonTexture = Content.Load<Texture2D>("buttonTexture");
 
             // FONTS
             titleReportFont = Content.Load<SpriteFont>("1942Font");
@@ -225,7 +232,7 @@ namespace Final_Project
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             newMouseState = Mouse.GetState();
-            keyboardState = Keyboard.GetState();
+            newKeyboardState = Keyboard.GetState();
             iconBlinkCounter++;
 
             // CALCULATE CARD DISTANCE VECTOR
@@ -274,6 +281,12 @@ namespace Final_Project
 
             else if (screen == Screen.Game)
             {
+                if (newKeyboardState.IsKeyDown(Keys.H) && newKeyboardState != oldKeyboardState)
+                {
+                    screen = Screen.Hiding;
+                }
+
+
                 if (currentRoom == Room.yourEscapePodRoom)
                 {
                     if (newMouseState.LeftButton == ButtonState.Pressed && mapButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
@@ -439,7 +452,7 @@ namespace Final_Project
 
                     if (elapsedTimeSec >= 4)
                     {
-                        if (activeTask == Story.start)
+                        if (activeTask == Story.goToLogRoom)
                         {
                             currentRoom = Room.dockingBayRoom;
                             onXunari = true;
@@ -458,17 +471,17 @@ namespace Final_Project
                 }
 
             }
+
             else if (screen == Screen.EscapePodMap)
             {
                 if (newMouseState.LeftButton == ButtonState.Pressed && xunariMapRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                 {
                     travelToXunariPrompt = true;
                 }
-                if (travelToXunariPrompt && keyboardState.IsKeyDown(Keys.Enter))
+                if (travelToXunariPrompt && newKeyboardState.IsKeyDown(Keys.Enter))
                 {
                     screen = Screen.Game;
-                    currentRoom = Room.dockingBayRoom; // change this back to Room.travelling when done debugging
-                    onXunari = true; // and delete this line
+                    currentRoom = Room.travelling; 
                     activeTask = Story.goToLogRoom;
                     timeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
                     travelToXunariPrompt = false;
@@ -477,10 +490,38 @@ namespace Final_Project
 
             else if (screen == Screen.end)
             {
+                endTextFlasherCount++;
 
+                if (newMouseState.LeftButton == ButtonState.Pressed && newMouseState != oldMouseState)
+                    endStoryPanelCount++;
+
+                endStoryYesButtonRect = new Rectangle(400, 500, 100, 100);
+
+                if (newMouseState.LeftButton == ButtonState.Pressed && endStoryYesButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                {
+                    timeStamp = (float)gameTime.TotalGameTime.TotalSeconds; // use these time stamps to wait for the game to return to the title screen after SFXs are done playing
+                    screen = Screen.outro;
+                }
+
+                if (endStoryNoButtonRect.Contains(newMouseState.X, newMouseState.Y))
+                    endStoryNoButtonRect = new Rectangle();
+
+                else
+                    endStoryNoButtonRect = new Rectangle(830, 500, 100, 100);
             }
 
+            else if (screen == Screen.outro)
+            {
+                elapsedTimeSec = (float)gameTime.TotalGameTime.TotalSeconds - timeStamp;
+                if (elapsedTimeSec >= 8)
+                {
+                    Reset();
+                    Initialize();
+                    screen = Screen.Title;
+                }
+            }
 
+            // change target keycard
             if (inRoomWithKeyCard && newMouseState.LeftButton == ButtonState.Pressed && storyButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
             {
                 inRoomWithKeyCard = false;
@@ -501,8 +542,8 @@ namespace Final_Project
                 }
             }
             
-
             oldMouseState = newMouseState;
+            oldKeyboardState = newKeyboardState;
             base.Update(gameTime);
         }
 
@@ -561,6 +602,36 @@ namespace Final_Project
                 }
 
                 _spriteBatch.Draw(closeButtonTexture, closeButtonRect, Color.White);
+            }
+
+            else if (screen == Screen.end)
+            {
+                if (endStoryPanelCount == 0)
+                    _spriteBatch.Draw(bridgeStoryPanel1Texture, backgroundRect, Color.White);
+
+                else if (endStoryPanelCount >= 1)
+                {
+                    _spriteBatch.Draw(bridgeStoryPanel2Texture, backgroundRect, Color.White);
+                    _spriteBatch.Draw(panelButtonTexture, endStoryYesButtonRect, Color.DarkSlateBlue);
+
+                    if (!endStoryNoButtonRect.Contains(newMouseState.X, newMouseState.Y))
+                        _spriteBatch.Draw(panelButtonTexture, endStoryNoButtonRect, Color.DarkSlateBlue);
+
+                    else if (endStoryNoButtonRect.Contains(newMouseState.X, newMouseState.Y))
+                    {
+                        if (endTextFlasherCount <= 5)
+                        {
+                            _spriteBatch.DrawString(generalTextFont, "YOU CANNOT DELAY THE INEVITABLE.", new Vector2(400, 700), Color.DarkRed);
+                        }
+                        else if (endTextFlasherCount > 5 && iconBlinkCounter <= 10)
+                        {
+                            _spriteBatch.DrawString(generalTextFont, "YOU CANNOT DELAY THE INEVITABLE.", new Vector2(400, 700), Color.Black);
+                        }
+                        else if (endTextFlasherCount >= 11)
+                            endTextFlasherCount = 0;
+                    }
+
+                }
             }
 
             else if (screen == Screen.Game)
@@ -1052,7 +1123,7 @@ namespace Final_Project
                 _spriteBatch.Draw(circleCursor, new Vector2(newMouseState.X, newMouseState.Y), Color.White);
             }
 
-            if (onXunari && currentRoom != Room.travelling)
+            if (onXunari && currentRoom != Room.travelling && activeTask != Story.end)
             {
                 _spriteBatch.Draw(BoxFrameTexture, locationBoxRect, Color.White);
             }
@@ -1068,7 +1139,13 @@ namespace Final_Project
                 TrackerIndicator();
                 DrawKeyCards();
             }
-           
+            
+            if (currentRoom == Room.travelling && activeTask == Story.goToLogRoom)
+            {
+                _spriteBatch.DrawString(generalTextFont, "A heartbeat will indicate how close a monster is to you.", new Vector2(200, 500), Color.DarkRed);
+                _spriteBatch.DrawString(generalTextFont, "Pay attention and press H to hide when they find you.", new Vector2(220, 600), Color.DarkRed);
+            }
+
 
             _spriteBatch.End();
 
@@ -1080,23 +1157,6 @@ namespace Final_Project
         // ///////////////////////////////////////
         // ///////////////////////////////////////
         // ALT METHODS
-
-        public void RunMapBlinker()
-        {
-            if (iconBlinkCounter < 60)
-            {
-                _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
-            }
-            else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
-            {
-                _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
-            }
-            else if (iconBlinkCounter >= 120)
-            {
-                iconBlinkCounter = 0;
-                _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
-            }
-        }
 
         public void UpdateDockingBay()
         {
@@ -1553,6 +1613,23 @@ namespace Final_Project
 
         // ////////////////////////////////
 
+        public void RunMapBlinker()
+        {
+            if (iconBlinkCounter < 60)
+            {
+                _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+            }
+            else if (iconBlinkCounter > 60 && iconBlinkCounter < 120)
+            {
+                _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.DarkRed);
+            }
+            else if (iconBlinkCounter >= 120)
+            {
+                iconBlinkCounter = 0;
+                _spriteBatch.Draw(miniMapCurrentRoomTexture, miniMapCurrentRoomRect, Color.Black);
+            }
+        }
+
         public void DrawKeyCards()
         {
             if (currentRoom != Room.travelling)
@@ -1665,6 +1742,36 @@ namespace Final_Project
 
         }
 
+        public void AddQuickTimeKeys()
+        {
+            quicktimeLetters.Add("A");
+            quicktimeLetters.Add("B");
+            quicktimeLetters.Add("C");
+            quicktimeLetters.Add("D");
+            quicktimeLetters.Add("E");
+            quicktimeLetters.Add("F");
+            quicktimeLetters.Add("G");
+            quicktimeLetters.Add("H");
+            quicktimeLetters.Add("I");
+            quicktimeLetters.Add("J");
+            quicktimeLetters.Add("K");
+            quicktimeLetters.Add("L");
+            quicktimeLetters.Add("M");
+            quicktimeLetters.Add("N");
+            quicktimeLetters.Add("O");
+            quicktimeLetters.Add("P");
+            quicktimeLetters.Add("Q");
+            quicktimeLetters.Add("R");
+            quicktimeLetters.Add("S");
+            quicktimeLetters.Add("T");
+            quicktimeLetters.Add("U");
+            quicktimeLetters.Add("V");
+            quicktimeLetters.Add("W");
+            quicktimeLetters.Add("X");
+            quicktimeLetters.Add("Y");
+            quicktimeLetters.Add("Z");
+        }
+
         public void TrackerIndicator()
         {
             if (activeTask == Story.findKeyCard2 || activeTask == Story.findKeyCard3 || activeTask == Story.findKeyCard4 && currentRoom != Room.travelling && !inRoomWithKeyCard)
@@ -1758,6 +1865,25 @@ namespace Final_Project
                     }
                 }
             }
+        }
+
+        public void Reset()
+        {
+            storyPanelCount = 0;
+            logPanelCount = 0;
+            altEscapePodPanelCount = 0;
+            keyCardsHeld = 0;
+            endStoryPanelCount = 0;
+            endTextFlasherCount = 0;
+            travelToXunariPrompt = false;
+            onXunari = false;
+            readingShipLogs = false;
+            inRoomWithKeyCard = false;
+            endYesSelected = false;
+            endNoSelected = false;
+
+            rooms.Clear();
+            roomRects.Clear();
         }
     }
 }
