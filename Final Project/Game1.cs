@@ -76,15 +76,16 @@ namespace Final_Project
 
         Story activeTask;
         Screen screen;
-        Room currentRoom, prevRoom;
+        Room currentRoom, prevRoom, monsterCurrentRoom;
+        Keys quickTimeLetter;
         SpriteFont titleReportFont, generalTextFont;
         MouseState newMouseState, oldMouseState;
         KeyboardState newKeyboardState, oldKeyboardState;
         List<Rectangle> roomRects = new List<Rectangle>();
         List<Room> rooms = new List<Room>();
-        List<string> quicktimeLetters = new List<string>();
+        List<Keys> quicktimeLetters = new List<Keys>();
 
-        Texture2D yourEscapePodTexture, altEscapePodTexture, dockingBayTexture, escapePodBayTexture, cargoBayTexture, hallway1Texture, hallway2Texture, residenceRoom1Texture, residenceRoom2Texture, messHallRoomTexture, securityRoomTexture, medBayRoomTexture, engineRoomTexture, reactorRoomTexture, logRoomTexture, commRoomTexture, elevatorRoomTexture, captainsQuartersRoomTexture, bridgeTexture, titleScreen;
+        Texture2D yourEscapePodTexture, altEscapePodTexture, dockingBayTexture, escapePodBayTexture, cargoBayTexture, hallway1Texture, hallway2Texture, residenceRoom1Texture, residenceRoom2Texture, messHallRoomTexture, securityRoomTexture, medBayRoomTexture, engineRoomTexture, reactorRoomTexture, logRoomTexture, commRoomTexture, elevatorRoomTexture, captainsQuartersRoomTexture, bridgeTexture, titleScreen, hidingTexture;
         Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture, moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown, circleCursor, BoxFrameTexture, logPanel1Texture, logPanel2Texture, escapePodPanel1Texture, escapePodPanel2Texture, escapePodPanel3Texture, escapePodPanel4Texture, blueKeyCard1Texture, redKeyCard2Texture, yellowKeyCard3Texture, orangeKeyCard4Texture, purpleKeyCard5Texture, cardTrackerTexture, bridgeStoryPanel1Texture, bridgeStoryPanel2Texture, panelButtonTexture;
         Texture2D DBmove1, DBmove2, DBmove3;
         Random generator = new Random();
@@ -93,7 +94,7 @@ namespace Final_Project
         Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4, locationBoxRect, textBoxRect, storyButtonRect, keyCard1Rect, keyCard2Rect, keyCard3Rect, keyCard4Rect, keyCard5Rect, cardTrackerRect, trackerBlinkerRect, endStoryYesButtonRect, endStoryNoButtonRect;
         Rectangle dockBayMapRect, podBayMapRect, res1MapRect, res2MapRect, messMapRect, secMapRect, cargoMapRect, hallAMapRect, hallBMapRect, hallCMapRect, hallDMapRect, hallEMapRect, medMapRect, engineMapRect, reactorMapRect, logMapRect, commMapRect, elevatorBlinkerRect;
 
-        int storyPanelCount = 0, logPanelCount = 0, altEscapePodPanelCount = 0, iconBlinkCounter, cardTrackerBlinker, keyCardsHeld = 0, keyCard2Location, keyCard3Location, keyCard4Location, playerRoomNum, endStoryPanelCount = 0, endTextFlasherCount = 0;
+        int storyPanelCount = 0, logPanelCount = 0, altEscapePodPanelCount = 0, iconBlinkCounter, cardTrackerBlinker, keyCardsHeld = 0, keyCard2Location, keyCard3Location, keyCard4Location, playerRoomNum, endStoryPanelCount = 0, endTextFlasherCount = 0, monsterTeleportTo, newHideI, oldHideI;
         float timeStamp, elapsedTimeSec;
         double cardDistanceX, cardDistanceY, cardDistanceVector;
         bool travelToXunariPrompt = false, onXunari = false, readingShipLogs = false, inRoomWithKeyCard = false, endYesSelected = false, endNoSelected = false;
@@ -108,7 +109,7 @@ namespace Final_Project
 
             startButtonRect = new Rectangle(520, 515, 220, 110);
             mapButtonRect = new Rectangle(1115, 855, 150, 130);
-            closeButtonRect = new Rectangle(1610, 0, 50, 50);
+            closeButtonRect = new Rectangle(1215, 10, 50, 50);
 
             storyTextBox = new Rectangle(250, 50, 800, 800);
             locationBoxRect = new Rectangle(10, 890, 250, 100);
@@ -182,6 +183,7 @@ namespace Final_Project
             captainsQuartersRoomTexture = Content.Load<Texture2D>("captainsQuartersRoom");
             bridgeTexture = Content.Load<Texture2D>("bridgeRoom");
             titleScreen = Content.Load<Texture2D>("titleScreen");
+            hidingTexture = Content.Load<Texture2D>("insideLocker");
 
             // ICONS, BUTTONS, & CURSORS
             rectangleButtonTexture = Content.Load<Texture2D>("rectangle");
@@ -281,11 +283,13 @@ namespace Final_Project
 
             else if (screen == Screen.Game)
             {
-                if (newKeyboardState.IsKeyDown(Keys.H) && newKeyboardState != oldKeyboardState)
+                if (onXunari)
                 {
-                    screen = Screen.Hiding;
+                    if (newKeyboardState.IsKeyDown(Keys.H) && newKeyboardState != oldKeyboardState)
+                    {
+                        screen = Screen.Hiding;
+                    }
                 }
-
 
                 if (currentRoom == Room.yourEscapePodRoom)
                 {
@@ -521,6 +525,14 @@ namespace Final_Project
                 }
             }
 
+            else if (screen == Screen.Hiding)
+            {
+                if (newMouseState.LeftButton == ButtonState.Pressed && closeButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                {
+                    screen = Screen.Game;
+                }
+            }
+
             // change target keycard
             if (inRoomWithKeyCard && newMouseState.LeftButton == ButtonState.Pressed && storyButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
             {
@@ -541,7 +553,8 @@ namespace Final_Project
                     activeTask = Story.findKeyCard5;
                 }
             }
-            
+
+            monsterCurrentRoom = currentRoom; // debug
             oldMouseState = newMouseState;
             oldKeyboardState = newKeyboardState;
             base.Update(gameTime);
@@ -1112,6 +1125,54 @@ namespace Final_Project
                             _spriteBatch.Draw(rectangleButtonTexture, storyButtonRect, Color.Black);
                             _spriteBatch.DrawString(generalTextFont, "Travel to Xunari", new Vector2(965, 900), Color.Olive);
                         }
+                    }
+                }
+            } // Rooms
+
+            else if (screen == Screen.Hiding)
+            {
+                if (monsterCurrentRoom == currentRoom)
+                {
+                    //_spriteBatch.Draw(theMan, theManRect, Color.White);
+                }
+                _spriteBatch.Draw(hidingTexture, backgroundRect, Color.White);
+
+
+                if (monsterCurrentRoom == currentRoom)
+                {
+                    for (int i = 1; i <= 6;)
+                    {
+                        newHideI = i;
+                        if (newHideI != oldHideI)
+                        {
+                            quickTimeLetter = quicktimeLetters[generator.Next(0, 26)];
+                            _spriteBatch.DrawString(titleReportFont, quickTimeLetter.ToString(), new Vector2(500, 500), Color.DarkRed);
+                            timeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
+
+                            if (newKeyboardState != oldKeyboardState)
+                            {
+                                if (newKeyboardState.IsKeyDown(quickTimeLetter) && elapsedTimeSec < 0.6 || i == 1)
+                                {
+                                    oldHideI = newHideI;
+                                    i++;
+                                }
+                                else if (!newKeyboardState.IsKeyDown(quickTimeLetter))
+                                {
+                                    i = 0;
+                                    Kill();
+                                }
+                                if (i == 6)
+                                {
+                                    while (monsterCurrentRoom == currentRoom)
+                                        monsterCurrentRoom = rooms[generator.Next(0, 18)];
+                                }
+                            }
+                        }
+                        elapsedTimeSec = (float)gameTime.TotalGameTime.TotalSeconds - timeStamp;
+
+                        
+                        
+                        
                     }
                 }
             }
@@ -1744,32 +1805,33 @@ namespace Final_Project
 
         public void AddQuickTimeKeys()
         {
-            quicktimeLetters.Add("A");
-            quicktimeLetters.Add("B");
-            quicktimeLetters.Add("C");
-            quicktimeLetters.Add("D");
-            quicktimeLetters.Add("E");
-            quicktimeLetters.Add("F");
-            quicktimeLetters.Add("G");
-            quicktimeLetters.Add("H");
-            quicktimeLetters.Add("I");
-            quicktimeLetters.Add("J");
-            quicktimeLetters.Add("K");
-            quicktimeLetters.Add("L");
-            quicktimeLetters.Add("M");
-            quicktimeLetters.Add("N");
-            quicktimeLetters.Add("O");
-            quicktimeLetters.Add("P");
-            quicktimeLetters.Add("Q");
-            quicktimeLetters.Add("R");
-            quicktimeLetters.Add("S");
-            quicktimeLetters.Add("T");
-            quicktimeLetters.Add("U");
-            quicktimeLetters.Add("V");
-            quicktimeLetters.Add("W");
-            quicktimeLetters.Add("X");
-            quicktimeLetters.Add("Y");
-            quicktimeLetters.Add("Z");
+            quicktimeLetters.Add(Keys.A);
+            quicktimeLetters.Add(Keys.B);
+            quicktimeLetters.Add(Keys.C);
+            quicktimeLetters.Add(Keys.D);
+            quicktimeLetters.Add(Keys.E);
+            quicktimeLetters.Add(Keys.F);
+            quicktimeLetters.Add(Keys.G);
+            quicktimeLetters.Add(Keys.H);
+            quicktimeLetters.Add(Keys.I);
+            quicktimeLetters.Add(Keys.J);
+            quicktimeLetters.Add(Keys.K);
+            quicktimeLetters.Add(Keys.L);
+            quicktimeLetters.Add(Keys.M);
+            quicktimeLetters.Add(Keys.N);
+            quicktimeLetters.Add(Keys.O);
+            quicktimeLetters.Add(Keys.P);
+            quicktimeLetters.Add(Keys.Q);
+            quicktimeLetters.Add(Keys.R);
+            quicktimeLetters.Add(Keys.S);
+            quicktimeLetters.Add(Keys.T);
+            quicktimeLetters.Add(Keys.U);
+            quicktimeLetters.Add(Keys.V);
+            quicktimeLetters.Add(Keys.W);
+            quicktimeLetters.Add(Keys.X);
+            quicktimeLetters.Add(Keys.Y);
+            quicktimeLetters.Add(Keys.Z);
+
         }
 
         public void TrackerIndicator()
@@ -1884,6 +1946,11 @@ namespace Final_Project
 
             rooms.Clear();
             roomRects.Clear();
+        }
+
+        public void Kill()
+        {
+
         }
     }
 }

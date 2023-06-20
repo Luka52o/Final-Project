@@ -619,6 +619,18 @@
 /processorParam:TextureFormat=Color
 /build:TextBorder.png
 
+#begin theMan.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:theMan.png
+
 #begin titleScreen.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -630,6 +642,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:titleScreen.png
+
+#begin X:/My Drive/ICS4U1 - COMPUTER SCIENCE/Final Project/Resources/insideLocker.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:X:/My Drive/ICS4U1 - COMPUTER SCIENCE/Final Project/Resources/insideLocker.png;insideLocker.png
 
 #begin xunariMapIcon.png
 /importer:TextureImporter
