@@ -346,15 +346,8 @@
 /build:hammerKeysFont.spritefont
 
 #begin insideLocker.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
+/importer:
+/processor:
 /build:insideLocker.png
 
 #begin logPanel1.png
@@ -644,16 +637,7 @@
 /build:titleScreen.png
 
 #begin X:/My Drive/ICS4U1 - COMPUTER SCIENCE/Final Project/Resources/insideLocker.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:X:/My Drive/ICS4U1 - COMPUTER SCIENCE/Final Project/Resources/insideLocker.png;insideLocker.png
+/copy:X:/My Drive/ICS4U1 - COMPUTER SCIENCE/Final Project/Resources/insideLocker.png;insideLocker.png
 
 #begin xunariMapIcon.png
 /importer:TextureImporter
