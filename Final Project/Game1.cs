@@ -8,6 +8,33 @@ using System.Linq.Expressions;
 
 namespace Final_Project
 {
+
+    public enum Room
+    {
+        yourEscapePodRoom,
+        altEscapePodRoom,
+        travelling,
+        dockingBayRoom,   // 1
+        escapePodBayRoom, // 2
+        residenceRoom1,   // 3
+        residenceRoom2,   // 4
+        messHallRoom,     // 5
+        securityRoom,     // 6
+        cargoBayRoom,     // 7
+        hallwayARoom,     // 8
+        hallwayBRoom,     // 9
+        hallwayCRoom,     // 10
+        hallwayDRoom,     // 11
+        hallwayERoom,     // 12
+        medBayRoom,       // 13
+        engineRoom,       // 14
+        reactorRoom,      // 15
+        logRoom,          // 16
+        commRoom,         // 17
+        elevatorRoom,
+        captainsQuartersRoom,
+        bridgeRoom,
+    }
     public class Game1 : Game
     {
 
@@ -32,32 +59,7 @@ namespace Final_Project
             outro,
             dead
         }
-        enum Room
-        {
-            yourEscapePodRoom,
-            altEscapePodRoom,
-            travelling,
-            dockingBayRoom,   // 1
-            escapePodBayRoom, // 2
-            residenceRoom1,   // 3
-            residenceRoom2,   // 4
-            messHallRoom,     // 5
-            securityRoom,     // 6
-            cargoBayRoom,     // 7
-            hallwayARoom,     // 8
-            hallwayBRoom,     // 9
-            hallwayCRoom,     // 10
-            hallwayDRoom,     // 11
-            hallwayERoom,     // 12
-            medBayRoom,       // 13
-            engineRoom,       // 14
-            reactorRoom,      // 15
-            logRoom,          // 16
-            commRoom,         // 17
-            elevatorRoom,
-            captainsQuartersRoom,
-            bridgeRoom,
-        }
+        
 
         enum Story
         {
@@ -92,6 +94,7 @@ namespace Final_Project
         Point objectiveCardLocation;
         Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4, locationBoxRect, textBoxRect, storyButtonRect, keyCard1Rect, keyCard2Rect, keyCard3Rect, keyCard4Rect, keyCard5Rect, cardTrackerRect, trackerBlinkerRect, endStoryYesButtonRect, endStoryNoButtonRect, theManRect;
         Rectangle dockBayMapRect, podBayMapRect, res1MapRect, res2MapRect, messMapRect, secMapRect, cargoMapRect, hallAMapRect, hallBMapRect, hallCMapRect, hallDMapRect, hallEMapRect, medMapRect, engineMapRect, reactorMapRect, logMapRect, commMapRect, elevatorBlinkerRect;
+        Monster monster1, monster2;
 
         int storyPanelCount = 0, logPanelCount = 0, altEscapePodPanelCount = 0, iconBlinkCounter, cardTrackerBlinker, keyCardsHeld = 0, keyCard2Location, keyCard3Location, keyCard4Location, playerRoomNum, endStoryPanelCount = 0, endTextFlasherCount = 0, monsterTeleportTo, newHideI, oldHideI, quickTimeSuccessCounter;
         float timeStamp, elapsedTimeSec;
@@ -152,10 +155,6 @@ namespace Final_Project
                 keyCard4Location = generator.Next(1, 18);
 
             // Monster Initial Location Generation
-
-
-
-
 
             LocateRoomMapRects();
             AddQuickTimeKeys();
