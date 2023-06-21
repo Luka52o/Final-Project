@@ -21,7 +21,6 @@ namespace Final_Project
             IsMouseVisible = false;
         }
 
-
         enum Screen
         {
             Title,
@@ -73,11 +72,10 @@ namespace Final_Project
             openBridge,
             end
         }
-        
 
         Story activeTask;
         Screen screen;
-        Room currentRoom, prevRoom, monsterCurrentRoom;
+        Room currentRoom, prevRoom, monster1CurrentRoom, monster2CurrentRoom;
         Keys quickTimeLetter;
         SpriteFont titleReportFont, generalTextFont;
         MouseState newMouseState, oldMouseState;
@@ -152,6 +150,12 @@ namespace Final_Project
 
             while (keyCard4Location == keyCard2Location || keyCard4Location == keyCard3Location)
                 keyCard4Location = generator.Next(1, 18);
+
+            // Monster Initial Location Generation
+
+
+
+
 
             LocateRoomMapRects();
             AddQuickTimeKeys();
@@ -291,7 +295,7 @@ namespace Final_Project
                     if (newKeyboardState.IsKeyDown(Keys.H) && newKeyboardState != oldKeyboardState)
                     {
                         screen = Screen.Hiding;
-                        if (currentRoom == monsterCurrentRoom)
+                        if (currentRoom == monster1CurrentRoom || monster2CurrentRoom == currentRoom)
                         {
                             quickTimeLetter = quicktimeLetters[generator.Next(0, 26)];
                             timeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
@@ -535,12 +539,12 @@ namespace Final_Project
 
             else if (screen == Screen.Hiding)
             {
-                if (monsterCurrentRoom != currentRoom && newMouseState.LeftButton == ButtonState.Pressed && closeButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                if (monster1CurrentRoom != currentRoom || monster2CurrentRoom != currentRoom && newMouseState.LeftButton == ButtonState.Pressed && closeButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                 {
                     screen = Screen.Game;
                 }
 
-                if (monsterCurrentRoom == currentRoom)
+                if (monster1CurrentRoom == currentRoom|| monster2CurrentRoom == currentRoom)
                 {
                     elapsedTimeSec = (float)gameTime.TotalGameTime.TotalSeconds - timeStamp;
 
@@ -608,7 +612,6 @@ namespace Final_Project
                 }
             }
 
-            monsterCurrentRoom = currentRoom; // debug
             oldMouseState = newMouseState;
             oldKeyboardState = newKeyboardState;
             base.Update(gameTime);
@@ -1185,14 +1188,14 @@ namespace Final_Project
 
             else if (screen == Screen.Hiding)
             {
-                if (monsterCurrentRoom == currentRoom)
+                if (monster1CurrentRoom == currentRoom || monster2CurrentRoom == currentRoom)
                 {
                     _spriteBatch.Draw(theManTexture, theManRect, Color.White);
                 }
                 _spriteBatch.Draw(hidingTexture, backgroundRect, Color.White);
 
 
-                if (monsterCurrentRoom == currentRoom)
+                if (monster1CurrentRoom == currentRoom || monster2CurrentRoom == currentRoom)
                 {
                     elapsedTimeSec = (float)gameTime.TotalGameTime.TotalSeconds - timeStamp;
 
@@ -1981,6 +1984,11 @@ namespace Final_Project
 
             rooms.Clear();
             roomRects.Clear();
+        }
+
+        public void MoveMonster()
+        {
+
         }
 
     }
