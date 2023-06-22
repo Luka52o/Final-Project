@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,12 +9,8 @@ using System.Linq.Expressions;
 
 namespace Final_Project
 {
-
     public enum Room
     {
-        yourEscapePodRoom,
-        altEscapePodRoom,
-        travelling,
         dockingBayRoom,   // 1
         escapePodBayRoom, // 2
         residenceRoom1,   // 3
@@ -31,6 +28,9 @@ namespace Final_Project
         reactorRoom,      // 15
         logRoom,          // 16
         commRoom,         // 17
+        yourEscapePodRoom,
+        altEscapePodRoom,
+        travelling,
         elevatorRoom,
         captainsQuartersRoom,
         bridgeRoom,
@@ -77,35 +77,40 @@ namespace Final_Project
 
         Story activeTask;
         Screen screen;
-        Room currentRoom, prevRoom, monster1CurrentRoom, monster2CurrentRoom;
+        Song monsterHere, theXunari;
+        Room currentRoom, prevRoom;
         Keys quickTimeLetter;
         SpriteFont titleReportFont, generalTextFont;
         MouseState newMouseState, oldMouseState;
         KeyboardState newKeyboardState, oldKeyboardState;
         List<Rectangle> roomRects = new List<Rectangle>();
-        List<Room> rooms = new List<Room>();
+        public List<Room> rooms { get; set; } = new List<Room>();
         List<Keys> quicktimeLetters = new List<Keys>();
 
         Texture2D yourEscapePodTexture, altEscapePodTexture, dockingBayTexture, escapePodBayTexture, cargoBayTexture, hallway1Texture, hallway2Texture, residenceRoom1Texture, residenceRoom2Texture, messHallRoomTexture, securityRoomTexture, medBayRoomTexture, engineRoomTexture, reactorRoomTexture, logRoomTexture, commRoomTexture, elevatorRoomTexture, captainsQuartersRoomTexture, bridgeTexture, titleScreen, hidingTexture;
         Texture2D rectangleButtonTexture, circleIconTexture, storyPanel1, storyPanel2, closeButtonTexture, xunariMapIconTexture, miniMapTexture, miniMapCurrentRoomTexture, moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown, circleCursor, BoxFrameTexture, logPanel1Texture, logPanel2Texture, escapePodPanel1Texture, escapePodPanel2Texture, escapePodPanel3Texture, escapePodPanel4Texture, blueKeyCard1Texture, redKeyCard2Texture, yellowKeyCard3Texture, orangeKeyCard4Texture, purpleKeyCard5Texture, cardTrackerTexture, bridgeStoryPanel1Texture, bridgeStoryPanel2Texture, panelButtonTexture, theManTexture;
         Texture2D DBmove1, DBmove2, DBmove3;
         Random generator = new Random();
+        Monster monster1;
+        Monster monster2;
 
         Point objectiveCardLocation;
         Rectangle backgroundRect, startButtonRect, storyTextBox, mapButtonRect, closeButtonRect, escapePodMapIconRect, xunariMapRect, miniMapRect, miniMapCurrentRoomRect, moveRoomRect1, moveRoomRect2, moveRoomRect3, moveRoomRect4, locationBoxRect, textBoxRect, storyButtonRect, keyCard1Rect, keyCard2Rect, keyCard3Rect, keyCard4Rect, keyCard5Rect, cardTrackerRect, trackerBlinkerRect, endStoryYesButtonRect, endStoryNoButtonRect, theManRect;
         Rectangle dockBayMapRect, podBayMapRect, res1MapRect, res2MapRect, messMapRect, secMapRect, cargoMapRect, hallAMapRect, hallBMapRect, hallCMapRect, hallDMapRect, hallEMapRect, medMapRect, engineMapRect, reactorMapRect, logMapRect, commMapRect, elevatorBlinkerRect;
-        Monster monster1, monster2;
 
         int storyPanelCount = 0, logPanelCount = 0, altEscapePodPanelCount = 0, iconBlinkCounter, cardTrackerBlinker, keyCardsHeld = 0, keyCard2Location, keyCard3Location, keyCard4Location, playerRoomNum, endStoryPanelCount = 0, endTextFlasherCount = 0, monsterTeleportTo, newHideI, oldHideI, quickTimeSuccessCounter;
         float timeStamp, elapsedTimeSec;
         double cardDistanceX, cardDistanceY, cardDistanceVector;
-        bool travelToXunariPrompt = false, onXunari = false, readingShipLogs = false, inRoomWithKeyCard = false, endYesSelected = false, endNoSelected = false, quickTimeFirstRound = true;
+        bool travelToXunariPrompt = false, onXunari = false, readingShipLogs = false, inRoomWithKeyCard = false, endYesSelected = false, endNoSelected = false, quickTimeFirstRound = true, monsterHerePlaying = false;
 
         protected override void Initialize()
         {
             _graphics.PreferredBackBufferWidth = 1275;
             _graphics.PreferredBackBufferHeight = 1000;
             _graphics.ApplyChanges();
+
+            monster1 = new Monster();
+            monster2 = new Monster();
 
             backgroundRect = new Rectangle(0, 0, 1275, 1000);
             theManRect = new Rectangle(200, 100, 875, 800);
@@ -142,6 +147,24 @@ namespace Final_Project
             screen = Screen.Title;
             activeTask = Story.start;
 
+            rooms.Add(Room.dockingBayRoom);
+            rooms.Add(Room.escapePodBayRoom);
+            rooms.Add(Room.residenceRoom1);
+            rooms.Add(Room.residenceRoom2);
+            rooms.Add(Room.messHallRoom);
+            rooms.Add(Room.securityRoom);
+            rooms.Add(Room.cargoBayRoom);
+            rooms.Add(Room.hallwayARoom);
+            rooms.Add(Room.hallwayBRoom);
+            rooms.Add(Room.hallwayCRoom);
+            rooms.Add(Room.hallwayDRoom);
+            rooms.Add(Room.hallwayERoom);
+            rooms.Add(Room.medBayRoom);
+            rooms.Add(Room.engineRoom);
+            rooms.Add(Room.reactorRoom);
+            rooms.Add(Room.logRoom);
+            rooms.Add(Room.commRoom);
+
             // key card location generation
             keyCard2Location = generator.Next(1, 18);
             keyCard3Location = generator.Next(1, 18);
@@ -153,8 +176,6 @@ namespace Final_Project
 
             while (keyCard4Location == keyCard2Location || keyCard4Location == keyCard3Location)
                 keyCard4Location = generator.Next(1, 18);
-
-            // Monster Initial Location Generation
 
             LocateRoomMapRects();
             AddQuickTimeKeys();
@@ -226,6 +247,10 @@ namespace Final_Project
             titleReportFont = Content.Load<SpriteFont>("1942Font");
             generalTextFont = Content.Load<SpriteFont>("momTypewriter");
 
+            // SOUND
+            monsterHere = Content.Load<Song>("MonsterHere");
+            theXunari = Content.Load<Song>("theXunari");
+
             // DEBUG
             DBmove1 = Content.Load<Texture2D>("DBmoveRoom1");
             DBmove2 = Content.Load<Texture2D>("DBmoveRoom2");
@@ -241,6 +266,7 @@ namespace Final_Project
                 Exit();
             newMouseState = Mouse.GetState();
             newKeyboardState = Keyboard.GetState();
+
             iconBlinkCounter++;
 
             // CALCULATE CARD DISTANCE VECTOR
@@ -291,10 +317,25 @@ namespace Final_Project
             {
                 if (onXunari)
                 {
+                    if (monster1.RoomLocationEnum == currentRoom || monster2.RoomLocationEnum == currentRoom)
+                    {
+                        if (!monsterHerePlaying)
+                        {
+                            MediaPlayer.Play(monsterHere);
+                            monsterHerePlaying = true;
+                        }
+                    }
+                    if (monsterHerePlaying)
+                    {
+                        monster1.RoomLocationEnum = currentRoom;
+                        monster2.RoomLocationEnum = currentRoom;
+                    }
+
+
                     if (newKeyboardState.IsKeyDown(Keys.H) && newKeyboardState != oldKeyboardState)
                     {
                         screen = Screen.Hiding;
-                        if (currentRoom == monster1CurrentRoom || monster2CurrentRoom == currentRoom)
+                        if (currentRoom == monster1.RoomLocationEnum || monster2.RoomLocationEnum == currentRoom)
                         {
                             quickTimeLetter = quicktimeLetters[generator.Next(0, 26)];
                             timeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
@@ -498,6 +539,10 @@ namespace Final_Project
                     screen = Screen.Game;
                     currentRoom = Room.travelling; 
                     activeTask = Story.goToLogRoom;
+
+                    monster1.InitializeLocation();
+                    monster2.InitializeLocation();
+
                     timeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
                     travelToXunariPrompt = false;
                 }
@@ -538,12 +583,12 @@ namespace Final_Project
 
             else if (screen == Screen.Hiding)
             {
-                if (monster1CurrentRoom != currentRoom || monster2CurrentRoom != currentRoom && newMouseState.LeftButton == ButtonState.Pressed && closeButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
+                if (newMouseState.LeftButton == ButtonState.Pressed && closeButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                 {
                     screen = Screen.Game;
                 }
 
-                if (monster1CurrentRoom == currentRoom|| monster2CurrentRoom == currentRoom)
+                if (monster1.RoomLocationEnum == currentRoom || monster2.RoomLocationEnum == currentRoom)
                 {
                     elapsedTimeSec = (float)gameTime.TotalGameTime.TotalSeconds - timeStamp;
 
@@ -575,6 +620,12 @@ namespace Final_Project
                     else if (quickTimeSuccessCounter == 6)
                     {
                         screen = Screen.Game;
+                        monster1.InitializeLocation();
+                        monster2.InitializeLocation();
+                        monsterHerePlaying = false;
+                        MediaPlayer.Stop();
+                        MediaPlayer.Play(theXunari);
+
                         quickTimeSuccessCounter = 0;
                     }
                 }
@@ -610,6 +661,7 @@ namespace Final_Project
                     activeTask = Story.findKeyCard5;
                 }
             }
+
 
             oldMouseState = newMouseState;
             oldKeyboardState = newKeyboardState;
@@ -1185,16 +1237,17 @@ namespace Final_Project
                 }
             } // Rooms
 
+
             else if (screen == Screen.Hiding)
             {
-                if (monster1CurrentRoom == currentRoom || monster2CurrentRoom == currentRoom)
+                if (monster1.RoomLocationEnum == currentRoom || monster2.RoomLocationEnum == currentRoom)
                 {
                     _spriteBatch.Draw(theManTexture, theManRect, Color.White);
                 }
                 _spriteBatch.Draw(hidingTexture, backgroundRect, Color.White);
 
 
-                if (monster1CurrentRoom == currentRoom || monster2CurrentRoom == currentRoom)
+                if (monster1.RoomLocationEnum == currentRoom || monster2.RoomLocationEnum == currentRoom)
                 {
                     elapsedTimeSec = (float)gameTime.TotalGameTime.TotalSeconds - timeStamp;
 
@@ -1204,7 +1257,6 @@ namespace Final_Project
                     }
                 }
             }
-
             else if (screen == Screen.dead)
             {
                 _spriteBatch.Draw(theManTexture, theManRect, Color.White);
@@ -1814,25 +1866,7 @@ namespace Final_Project
             roomRects.Add(reactorMapRect = new Rectangle(1215, 895, 30, 30));
             roomRects.Add(logMapRect = new Rectangle(1126, 850, 30, 30));
             roomRects.Add(commMapRect = new Rectangle(1217, 849, 30, 30));
-
-            rooms.Add(Room.dockingBayRoom);
-            rooms.Add(Room.escapePodBayRoom);
-            rooms.Add(Room.residenceRoom1);
-            rooms.Add(Room.residenceRoom2);
-            rooms.Add(Room.messHallRoom);
-            rooms.Add(Room.securityRoom);
-            rooms.Add(Room.cargoBayRoom);
-            rooms.Add(Room.hallwayARoom);
-            rooms.Add(Room.hallwayBRoom);
-            rooms.Add(Room.hallwayCRoom);
-            rooms.Add(Room.hallwayDRoom);
-            rooms.Add(Room.hallwayERoom);
-            rooms.Add(Room.medBayRoom);
-            rooms.Add(Room.engineRoom);
-            rooms.Add(Room.reactorRoom);
-            rooms.Add(Room.logRoom);
-            rooms.Add(Room.commRoom);
-
+            
         }
 
         public void AddQuickTimeKeys()
@@ -1985,10 +2019,6 @@ namespace Final_Project
             roomRects.Clear();
         }
 
-        public void MoveMonster()
-        {
-
-        }
-
+        
     }
 }
