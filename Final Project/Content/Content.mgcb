@@ -345,6 +345,24 @@
 /processorParam:TextureFormat=Compressed
 /build:hammerKeysFont.spritefont
 
+#begin HeartbeatClose.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:HeartbeatClose.mp3
+
+#begin HeartbeatFar.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:HeartbeatFar.mp3
+
+#begin HeartbeatMedium.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:HeartbeatMedium.mp3
+
 #begin insideLocker.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -636,6 +654,12 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:theMan.png
+
+#begin theXunari.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:theXunari.mp3
 
 #begin titleScreen.png
 /importer:TextureImporter

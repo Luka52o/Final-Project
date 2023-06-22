@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
@@ -78,12 +79,14 @@ namespace Final_Project
         Story activeTask;
         Screen screen;
         Song monsterHere, theXunari;
+        SoundEffect heartbeatSlow, heartbeatMedium, heartbeatFast;
+        SoundEffectInstance heartbeatSlowInstance, heartbeatMediumInstance, heartbeatFastInstance;
         Room currentRoom, prevRoom;
         Keys quickTimeLetter;
         SpriteFont titleReportFont, generalTextFont;
         MouseState newMouseState, oldMouseState;
         KeyboardState newKeyboardState, oldKeyboardState;
-        List<Rectangle> roomRects = new List<Rectangle>();
+        public List<Rectangle> roomRects { get; set; } = new List<Rectangle>();
         public List<Room> rooms { get; set; } = new List<Room>();
         List<Keys> quicktimeLetters = new List<Keys>();
 
@@ -99,9 +102,9 @@ namespace Final_Project
         Rectangle dockBayMapRect, podBayMapRect, res1MapRect, res2MapRect, messMapRect, secMapRect, cargoMapRect, hallAMapRect, hallBMapRect, hallCMapRect, hallDMapRect, hallEMapRect, medMapRect, engineMapRect, reactorMapRect, logMapRect, commMapRect, elevatorBlinkerRect;
 
         int storyPanelCount = 0, logPanelCount = 0, altEscapePodPanelCount = 0, iconBlinkCounter, cardTrackerBlinker, keyCardsHeld = 0, keyCard2Location, keyCard3Location, keyCard4Location, playerRoomNum, endStoryPanelCount = 0, endTextFlasherCount = 0, monsterTeleportTo, newHideI, oldHideI, quickTimeSuccessCounter;
-        float timeStamp, elapsedTimeSec;
-        double cardDistanceX, cardDistanceY, cardDistanceVector;
-        bool travelToXunariPrompt = false, onXunari = false, readingShipLogs = false, inRoomWithKeyCard = false, endYesSelected = false, endNoSelected = false, quickTimeFirstRound = true, monsterHerePlaying = false;
+        float timeStamp, elapsedTimeSec, monsterMoveTimeStamp, monsterMoveSec, timeToDieTimeStamp, timeToDieSec;
+        double cardDistanceX, cardDistanceY, cardDistanceVector, monster1DistanceX, monster1DistanceY, monster1DistanceVector, monster2DistanceX, monster2DistanceY, monster2DistanceVector;
+        bool travelToXunariPrompt = false, onXunari = false, readingShipLogs = false, inRoomWithKeyCard = false, endYesSelected = false, endNoSelected = false, quickTimeFirstRound = true, monsterHerePlaying = false, theXunariPlaying = false;
 
         protected override void Initialize()
         {
@@ -250,6 +253,14 @@ namespace Final_Project
             // SOUND
             monsterHere = Content.Load<Song>("MonsterHere");
             theXunari = Content.Load<Song>("theXunari");
+            heartbeatSlow = Content.Load<SoundEffect>("HeartbeatFar");
+            heartbeatMedium = Content.Load<SoundEffect>("HeartbeatMedium");
+            heartbeatFast = Content.Load<SoundEffect>("HeartbeatClose");
+
+            heartbeatSlowInstance = heartbeatSlow.CreateInstance();
+            heartbeatMediumInstance = heartbeatMedium.CreateInstance();
+            heartbeatFastInstance = heartbeatFast.CreateInstance();
+
 
             // DEBUG
             DBmove1 = Content.Load<Texture2D>("DBmoveRoom1");
@@ -289,11 +300,51 @@ namespace Final_Project
 
                 cardDistanceVector = Math.Sqrt(Math.Pow(cardDistanceX, 2) + Math.Pow(cardDistanceY, 2));
             }
+            
+            // Calculate Monster Distance Vectors
+            if (onXunari)
+            {
+                // monster 1
+                if (miniMapCurrentRoomRect.Center.X > monster1.MonsterMapLocation.X)
+                    monster1DistanceX = miniMapCurrentRoomRect.Center.X - monster1.MonsterMapLocation.X;
+
+                else if (miniMapCurrentRoomRect.Center.X < monster1.MonsterMapLocation.X)
+                    monster1DistanceX = monster1.MonsterMapLocation.X - miniMapCurrentRoomRect.Center.X;
+
+                if (miniMapCurrentRoomRect.Center.Y > monster1.MonsterMapLocation.Y)
+                    monster1DistanceY = miniMapCurrentRoomRect.Center.Y - monster1.MonsterMapLocation.Y;
+
+                else if (miniMapCurrentRoomRect.Center.Y < monster1.MonsterMapLocation.Y)
+                    monster2DistanceY = monster1.MonsterMapLocation.Y - miniMapCurrentRoomRect.Center.Y;
+
+                monster1DistanceVector = Math.Sqrt(Math.Pow(monster1DistanceX, 2) + Math.Pow(monster1DistanceY, 2));
+
+                // monster2
+                if (miniMapCurrentRoomRect.Center.X > monster2.MonsterMapLocation.X)
+                    monster2DistanceX = miniMapCurrentRoomRect.Center.X - monster2.MonsterMapLocation.X;
+
+                else if (miniMapCurrentRoomRect.Center.X < monster2.MonsterMapLocation.X)
+                    monster2DistanceX = monster2.MonsterMapLocation.X - miniMapCurrentRoomRect.Center.X;
+
+                if (miniMapCurrentRoomRect.Center.Y > monster2.MonsterMapLocation.Y)
+                    monster2DistanceY = miniMapCurrentRoomRect.Center.Y - monster2.MonsterMapLocation.Y;
+
+                else if (miniMapCurrentRoomRect.Center.Y < monster2.MonsterMapLocation.Y)
+                    monster2DistanceY = monster2.MonsterMapLocation.Y - miniMapCurrentRoomRect.Center.Y;
+
+                monster2DistanceVector = Math.Sqrt(Math.Pow(monster2DistanceX, 2) + Math.Pow(monster2DistanceY, 2));
+            }
 
             ////////////////////////////////////////
             // SCREENS
             if (screen == Screen.Title)
             {
+                if (!theXunariPlaying)
+                {
+                    MediaPlayer.Play(theXunari);
+                    theXunariPlaying = true;
+                }
+
                 if (newMouseState.LeftButton == ButtonState.Pressed && startButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                 {
                     screen = Screen.Story;
@@ -310,6 +361,7 @@ namespace Final_Project
                 {
                     screen = Screen.Game;
                     currentRoom = Room.yourEscapePodRoom;
+                    
                 }
             }
 
@@ -321,16 +373,22 @@ namespace Final_Project
                     {
                         if (!monsterHerePlaying)
                         {
+                            timeToDieTimeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
                             MediaPlayer.Play(monsterHere);
                             monsterHerePlaying = true;
                         }
+                        timeToDieSec = (float)gameTime.TotalGameTime.TotalSeconds - timeToDieTimeStamp;
                     }
                     if (monsterHerePlaying)
                     {
                         monster1.RoomLocationEnum = currentRoom;
                         monster2.RoomLocationEnum = currentRoom;
                     }
-
+                    if (timeToDieSec >= 5)
+                    {
+                        timeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
+                        screen = Screen.dead;
+                    }
 
                     if (newKeyboardState.IsKeyDown(Keys.H) && newKeyboardState != oldKeyboardState)
                     {
@@ -341,6 +399,16 @@ namespace Final_Project
                             timeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
                         }
                     }
+
+                    if (monsterMoveSec >= 3)
+                    {
+                        monsterMoveTimeStamp = (float)gameTime.TotalGameTime.TotalSeconds;
+
+                        monster1.UpdateMovement();
+                        monster2.UpdateMovement();
+                    }
+                    monsterMoveSec = (float)gameTime.TotalGameTime.TotalSeconds - monsterMoveTimeStamp;
+
                 }
 
                 if (currentRoom == Room.yourEscapePodRoom)
@@ -583,6 +651,8 @@ namespace Final_Project
 
             else if (screen == Screen.Hiding)
             {
+                timeToDieSec = 0;
+
                 if (newMouseState.LeftButton == ButtonState.Pressed && closeButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                 {
                     screen = Screen.Game;
@@ -662,6 +732,7 @@ namespace Final_Project
                 }
             }
 
+            MonsterMapTracker();
 
             oldMouseState = newMouseState;
             oldKeyboardState = newKeyboardState;
@@ -1246,6 +1317,8 @@ namespace Final_Project
                 }
                 _spriteBatch.Draw(hidingTexture, backgroundRect, Color.White);
 
+                if (monster1.RoomLocationEnum != currentRoom && monster2.RoomLocationEnum != currentRoom)
+                    _spriteBatch.Draw(closeButtonTexture, closeButtonRect, Color.White);
 
                 if (monster1.RoomLocationEnum == currentRoom || monster2.RoomLocationEnum == currentRoom)
                 {
@@ -1257,6 +1330,7 @@ namespace Final_Project
                     }
                 }
             }
+
             else if (screen == Screen.dead)
             {
                 _spriteBatch.Draw(theManTexture, theManRect, Color.White);
@@ -1817,7 +1891,7 @@ namespace Final_Project
         {
             if (activeTask == Story.findKeyCard2)
             {
-                for (int i = 1; i < 18; i++)
+                for (int i = 0; i < 18; i++)
                 {
                     if (keyCard2Location == i)
                     {
@@ -1827,7 +1901,7 @@ namespace Final_Project
             }
             else if (activeTask == Story.findKeyCard3)
             {
-                for (int i = 1; i < 18; i++)
+                for (int i = 0; i < 18; i++)
                 {
                     if (keyCard3Location == i)
                     {
@@ -1837,7 +1911,7 @@ namespace Final_Project
             }
             else if (activeTask == Story.findKeyCard4)
             {
-                for (int i = 1; i < 18; i++)
+                for (int i = 0; i < 18; i++)
                 {
                     if (keyCard4Location == i)
                     {
@@ -1849,7 +1923,7 @@ namespace Final_Project
 
         public void LocateRoomMapRects()
         {
-            roomRects.Add(dockBayMapRect = new Rectangle(1024, 942, 234, 31));
+            roomRects.Add(dockBayMapRect = new Rectangle(1024, 942, 234, 31)); 
             roomRects.Add(podBayMapRect = new Rectangle(1032, 895, 30, 30));
             roomRects.Add(res1MapRect = new Rectangle(1032, 807, 30, 30));
             roomRects.Add(res2MapRect = new Rectangle(1079, 767, 30, 30));
@@ -1962,7 +2036,7 @@ namespace Final_Project
                 }
                 if (activeTask == Story.findKeyCard2)
                 {
-                    for (int i = 1; i < 18; i++)
+                    for (int i = 1; i < 17; i++)
                     {
                         if (keyCard2Location == i && currentRoom == rooms[i])
                         {
@@ -1975,7 +2049,7 @@ namespace Final_Project
                 }
                 else if (activeTask == Story.findKeyCard3)
                 {
-                    for (int i = 1; i < 18; i++)
+                    for (int i = 1; i < 17; i++)
                     {
                         if (keyCard3Location == i && currentRoom == rooms[i])
                         {
@@ -1986,7 +2060,7 @@ namespace Final_Project
                 }
                 else if (activeTask == Story.findKeyCard4)
                 {
-                    for (int i = 1; i < 18; i++)
+                    for (int i = 1; i < 17; i++)
                     {
                         if (keyCard4Location == i && currentRoom == rooms[i])
                         {
@@ -2014,11 +2088,35 @@ namespace Final_Project
             inRoomWithKeyCard = false;
             endYesSelected = false;
             endNoSelected = false;
+            MediaPlayer.Stop();
+            monsterHerePlaying = false;
+            theXunariPlaying = false;
+            monsterMoveSec = 0;
+            monsterMoveTimeStamp = 0;
+            timeToDieSec = 0;
+            timeToDieTimeStamp = 0;
 
             rooms.Clear();
             roomRects.Clear();
         }
 
-        
+        public void MonsterMapTracker()
+        {
+            if (monster1DistanceVector >= 175 || monster2DistanceVector >= 175)
+            {
+                if (heartbeatSlowInstance.State == SoundState.Stopped)
+                    heartbeatSlowInstance.Play();
+            }
+            else if (monster1DistanceVector < 150 && monster1DistanceVector > 100 || monster2DistanceVector < 150 && monster2DistanceVector > 100)
+            {
+                if (heartbeatMediumInstance.State == SoundState.Stopped)
+                    heartbeatMediumInstance.Play();
+            }
+            else if (monster1DistanceVector < 100 && monster1DistanceVector > 1 || monster2DistanceVector < 100 && monster2DistanceVector > 1)
+            {
+                if (heartbeatFastInstance.State == SoundState.Stopped)
+                    heartbeatFastInstance.Play();
+            }
+        }
     }
 }
