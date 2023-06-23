@@ -79,7 +79,7 @@ namespace Final_Project
         Story activeTask;
         Screen screen;
         Song monsterHere, theXunari;
-        SoundEffect heartbeatSlow, heartbeatMedium, heartbeatFast;
+        SoundEffect heartbeatSlow, heartbeatMedium, heartbeatFast, death, powerLoss;
         SoundEffectInstance heartbeatSlowInstance, heartbeatMediumInstance, heartbeatFastInstance;
         Room currentRoom, prevRoom;
         Keys quickTimeLetter;
@@ -244,7 +244,7 @@ namespace Final_Project
             bridgeStoryPanel1Texture = Content.Load<Texture2D>("bridgePanel1");
             bridgeStoryPanel2Texture = Content.Load<Texture2D>("bridgePanel2");
             panelButtonTexture = Content.Load<Texture2D>("buttonTexture");
-            theManTexture = Content.Load<Texture2D>("theMan");
+            theManTexture = Content.Load<Texture2D>("theMonster");
 
             // FONTS
             titleReportFont = Content.Load<SpriteFont>("1942Font");
@@ -256,6 +256,8 @@ namespace Final_Project
             heartbeatSlow = Content.Load<SoundEffect>("HeartbeatFar");
             heartbeatMedium = Content.Load<SoundEffect>("HeartbeatMedium");
             heartbeatFast = Content.Load<SoundEffect>("HeartbeatClose");
+            death = Content.Load<SoundEffect>("death");
+            powerLoss = Content.Load<SoundEffect>("powerLoss");
 
             heartbeatSlowInstance = heartbeatSlow.CreateInstance();
             heartbeatMediumInstance = heartbeatMedium.CreateInstance();
@@ -627,8 +629,10 @@ namespace Final_Project
 
                 if (newMouseState.LeftButton == ButtonState.Pressed && endStoryYesButtonRect.Contains(newMouseState.X, newMouseState.Y) && newMouseState != oldMouseState)
                 {
-                    timeStamp = (float)gameTime.TotalGameTime.TotalSeconds; // use these time stamps to wait for the game to return to the title screen after SFXs are done playing
+                    timeStamp = (float)gameTime.TotalGameTime.TotalSeconds; 
                     screen = Screen.outro;
+                    MediaPlayer.Stop();
+                    powerLoss.Play();
                 }
 
                 if (endStoryNoButtonRect.Contains(newMouseState.X, newMouseState.Y))
@@ -641,6 +645,10 @@ namespace Final_Project
             else if (screen == Screen.outro)
             {
                 elapsedTimeSec = (float)gameTime.TotalGameTime.TotalSeconds - timeStamp;
+
+                if (elapsedTimeSec == 5)
+                    death.Play();
+
                 if (elapsedTimeSec >= 8)
                 {
                     Reset();
@@ -1281,23 +1289,23 @@ namespace Final_Project
 
                     if (activeTask == Story.findKeyCard1)
                     {
-                        if (altEscapePodPanelCount == 0)
+                        if (altEscapePodPanelCount == 1)
                         {
                             _spriteBatch.Draw(escapePodPanel1Texture, backgroundRect, Color.White);
                         }
-                        else if (altEscapePodPanelCount == 1)
+                        else if (altEscapePodPanelCount == 2)
                         {
                             _spriteBatch.Draw(escapePodPanel2Texture, backgroundRect, Color.White);
                         }
-                        else if (altEscapePodPanelCount == 2)
+                        else if (altEscapePodPanelCount == 3)
                         {
                             _spriteBatch.Draw(escapePodPanel3Texture, backgroundRect, Color.White);
                         }
-                        else if (altEscapePodPanelCount == 3)
+                        else if (altEscapePodPanelCount == 4)
                         {
                             _spriteBatch.Draw(escapePodPanel4Texture, backgroundRect, Color.White);
                         }
-                        else if (altEscapePodPanelCount >= 4)
+                        else if (altEscapePodPanelCount >= 5)
                         {
                             _spriteBatch.Draw(rectangleButtonTexture, textBoxRect, Color.Black);
                             _spriteBatch.DrawString(generalTextFont, "I should try to find the remaining keycards.", new Vector2(20, 20), Color.Olive);
@@ -1891,7 +1899,7 @@ namespace Final_Project
         {
             if (activeTask == Story.findKeyCard2)
             {
-                for (int i = 0; i < 18; i++)
+                for (int i = 0; i < 17; i++)
                 {
                     if (keyCard2Location == i)
                     {
@@ -1901,7 +1909,7 @@ namespace Final_Project
             }
             else if (activeTask == Story.findKeyCard3)
             {
-                for (int i = 0; i < 18; i++)
+                for (int i = 0; i < 17; i++)
                 {
                     if (keyCard3Location == i)
                     {
@@ -1911,7 +1919,7 @@ namespace Final_Project
             }
             else if (activeTask == Story.findKeyCard4)
             {
-                for (int i = 0; i < 18; i++)
+                for (int i = 0; i < 17; i++)
                 {
                     if (keyCard4Location == i)
                     {
